@@ -10,23 +10,10 @@ import Spacer from '../components/Spacer';
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
 const Home = () => {
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    const getMessage = () => {
-      fetch(`${API_URL}/api/message`)
-        .then(response => response.json())
-        .then(data => setMessage(data.text));
-    };
-    
-    getMessage();
-  }, []);
 
   return (
     <ThemedView style={styles.container}>
       <ThemedText style={styles.title} title={true}>Workout Tracker</ThemedText>
-      <Spacer height={20}/>
-      <ThemedText>{message}</ThemedText>
 
       <Link href="/profile" style = {styles.link}>
         <ThemedText>Profile Page</ThemedText>

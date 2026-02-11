@@ -49,12 +49,4 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginBottom: 30
     },
-    btn: {
-        backgroundColor: Colors.primary,
-        padding: 15,
-        borderRadius: 5,
-    },
-    pressed: {
-        opacity: 0.8
-    }
 })
