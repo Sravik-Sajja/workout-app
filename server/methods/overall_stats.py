@@ -28,9 +28,30 @@ def current_streak(user_id):
             else: break
         current -= timedelta(days=1)
     
-    return {
-        'streak': streak
-    }
+    return streak
+
+def workout_percentage_overall(user_id):
+    response = (
+        supabase.table("Workouts")
+        .select("date") 
+        .eq("UUID", user_id)
+        .order("date", desc=False)
+        .execute()
+    )
+
+    data = response.data
+    first_day = date.fromisoformat(data[0]['date'])
+    current_day = date.today()
+
+    time_difference = current_day - first_day
+    total_days = time_difference.days
+    days_worked_out = len(data)
+
+    workout_percentage = days_worked_out/total_days * 100
+
+    rounded = round(workout_percentage, 1)
+
+    return rounded
 
 def workout_distribution(user_id):
     response = (
@@ -51,7 +72,6 @@ def workout_distribution(user_id):
         'labels': list(workouts.keys()),
         'datasets': [{
             'data': list(workouts.values()),
-            'backgroundColor': ['red', 'yellow', 'orange']
         }]
     }
     return data

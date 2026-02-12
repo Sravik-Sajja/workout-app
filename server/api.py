@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
 from methods import workout
-from methods import stats
+from methods import overall_stats
 
 app = Flask(__name__)
 CORS(app)
@@ -23,9 +23,19 @@ def add_workout():
 def get_streak():
     try:
         user_id = request.args.get('user_id') 
-        streak = stats.current_streak(user_id)
+        streak = overall_stats.current_streak(user_id)
 
-        return jsonify({'streak': streak['streak']}), 200
+        return jsonify({'streak': streak}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/api/percentage", methods = ['GET'])
+def get_percentage():
+    try:
+        user_id = request.args.get('user_id') 
+        percentage = overall_stats.workout_percentage_overall(user_id)
+
+        return jsonify({'percentage': percentage}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -33,7 +43,7 @@ def get_streak():
 def get_distribution():
     try:
         user_id = request.args.get('user_id') 
-        workout_dis = stats.workout_distribution(user_id)
+        workout_dis = overall_stats.workout_distribution(user_id)
 
         return jsonify({'workoutDis': workout_dis}), 200
     except Exception as e:
