@@ -6,6 +6,7 @@ import ThemedView from "../../components/ThemedView";
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
 const Stats = () => {
+
   const [currentStreak, setCurrentStreak] = useState()
   const [workoutDis, setWorkoutDis] = useState()
   useEffect(() => {  
@@ -20,7 +21,7 @@ const Stats = () => {
           setWorkoutDis(data.workoutDis)       
         }
         catch(error){
-          Alert.alert('Error', error+ 'fetching streak');
+          Alert.alert('Error: ', error + ' fetching streak');
         }
       };
       getStats()
