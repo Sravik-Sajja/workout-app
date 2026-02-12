@@ -1,17 +1,23 @@
-def add_workout(data, connection):
+from lib.supabase import supabase
+
+def add_workout(data):
     date = data.get('date')
     workout_type = data.get('workout_type')
-    user_id = 1 #temporary
+    user_id = data.get('user_id')
 
-    query = "INSERT INTO workouts (user_id, date, workout_type) VALUES (?, ?, ?)"
-    params = [user_id, date, workout_type]
+    workout = {
+        "UUID": user_id,
+        "date": date,
+        "workout_type": workout_type,
+    }
 
-    cursor = connection.execute(query, params)
-    connection.commit()
-    workout_id = cursor.lastrowid
+    try:
+        response = supabase.table("Workouts").upsert(workout).execute()
+    except Exception as e:
+        print("Error inserting:", e)
+        raise
 
     return {
-        'id': workout_id,
         'user_id': user_id,
         'date': date,
         'workout_type': workout_type

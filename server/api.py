@@ -7,19 +7,13 @@ from methods import stats
 app = Flask(__name__)
 CORS(app)
 
-def get_db_connection():
-    connection = sqlite3.connect('workout.db')
-    connection.execute('PRAGMA foreign_keys = ON;')
-    return connection
     
 
 @app.route("/api/add-workout", methods = ['POST'])
 def add_workout():
     try:
         data = request.get_json()
-        connection = get_db_connection()
-        result = workout.add_workout(data, connection)
-        connection.close()
+        result = workout.add_workout(data)
 
         return jsonify({'message': 'Workout added successfully', 'data': result}), 200
     except Exception as e:
@@ -28,9 +22,9 @@ def add_workout():
 @app.route("/api/streak", methods = ['GET'])
 def get_streak():
     try:
-        connection = get_db_connection()
-        streak = stats.current_streak(connection)
-        connection.close()
+        user_id = request.args.get('user_id') 
+        streak = stats.current_streak(user_id)
+
         return jsonify({'streak': streak['streak']}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -38,9 +32,9 @@ def get_streak():
 @app.route("/api/distribution", methods = ['GET'])
 def get_distribution():
     try:
-        connection = get_db_connection()
-        workout_dis = stats.workout_distribution(connection)
-        connection.close()
+        user_id = request.args.get('user_id') 
+        workout_dis = stats.workout_distribution(user_id)
+
         return jsonify({'workoutDis': workout_dis}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

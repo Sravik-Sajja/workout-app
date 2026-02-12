@@ -5,6 +5,7 @@ import ThemedView from "../../components/ThemedView";
 import Spacer from "../../components/Spacer";
 import ThemedButton from "../../components/ThemedButton";
 import { Calendar } from 'react-native-calendars';
+import { supabase } from '../../lib/supabase'
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -19,12 +20,20 @@ const Workout = () => {
   const handleAddWorkout = async () => {
     setLoading(true)
     try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        setLoading(false)
+        Alert.alert('Error', userError?.message || 'Unable to get user info.')
+        return
+      }
+
       const response = await fetch(`${API_URL}/api/add-workout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          user_id: user.id,
           date: selectedDate,
           workout_type: workoutType.trim()
         })
