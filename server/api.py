@@ -19,33 +19,25 @@ def add_workout():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route("/api/streak", methods = ['GET'])
+@app.route("/api/get-workouts", methods = ['GET'])
+def get_workouts():
+    try:
+        user_id = request.args.get('user_id') 
+        all_workouts = workout.get_all_workouts(user_id)
+
+        return jsonify({'workouts': all_workouts}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/api/overall-stats", methods = ['GET'])
 def get_streak():
     try:
         user_id = request.args.get('user_id') 
         streak = overall_stats.current_streak(user_id)
-
-        return jsonify({'streak': streak}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route("/api/percentage", methods = ['GET'])
-def get_percentage():
-    try:
-        user_id = request.args.get('user_id') 
         percentage = overall_stats.workout_percentage_overall(user_id)
-
-        return jsonify({'percentage': percentage}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route("/api/distribution", methods = ['GET'])
-def get_distribution():
-    try:
-        user_id = request.args.get('user_id') 
         workout_dis = overall_stats.workout_distribution(user_id)
 
-        return jsonify({'workoutDis': workout_dis}), 200
+        return jsonify({'streak': streak, 'percentage': percentage, 'workoutDis': workout_dis}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

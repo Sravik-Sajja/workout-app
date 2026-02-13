@@ -15,7 +15,7 @@ const DashboardLayout = () => {
                 paddingTop: 10,
                 height: 90
             },
-            tabBarActiveTintColor: theme.iconColorFocused,
+            tabBarActiveTintColor: Colors.primary,
             tabBarInactiveTintColor: theme.iconColor
         }}
        >
@@ -23,7 +23,7 @@ const DashboardLayout = () => {
             <Ionicons
             size={24}
             name={focused ? 'person' : 'person-outline'}
-            color={focused ? theme.iconColorFocused : theme.iconColor}
+            color={focused ? Colors.primary : theme.iconColor}
             />
         )
         }}/>
@@ -31,7 +31,7 @@ const DashboardLayout = () => {
             <Ionicons
             size={24}
             name={focused ? 'walk' : 'walk-outline'}
-            color={focused ? theme.iconColorFocused : theme.iconColor}
+            color={focused ? Colors.primary : theme.iconColor}
             />
         )
         }}/>
@@ -39,7 +39,7 @@ const DashboardLayout = () => {
             <Ionicons
             size={24}
             name={focused ? 'stats-chart' : 'stats-chart-outline'}
-            color={focused ? theme.iconColorFocused : theme.iconColor}
+            color={focused ? Colors.primary : theme.iconColor}
             />
         )
         }}/>

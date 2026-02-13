@@ -26,20 +26,14 @@ const Stats = () => {
               Alert.alert('Error', userError?.message || 'Unable to get user info.')
               return
             }
-            const streakResponse = await fetch(`${API_URL}/api/streak?user_id=${user.id}`);
-            const streakData = await streakResponse.json();
-            setCurrentStreak(streakData.streak); 
-
-            const percentageResponse = await fetch(`${API_URL}/api/percentage?user_id=${user.id}`);
-            const percentageData = await percentageResponse.json();
-            setPercentage(percentageData.percentage); 
-            
-            const chartResponse = await fetch(`${API_URL}/api/distribution?user_id=${user.id}`);
-            const data = await chartResponse.json();
-            setWorkoutDis(data.workoutDis)       
+            const dataResponse = await fetch(`${API_URL}/api/overall-stats?user_id=${user.id}`);
+            const fullData = await dataResponse.json();
+            setCurrentStreak(fullData.streak); 
+            setPercentage(fullData.percentage); 
+            setWorkoutDis(fullData.workoutDis);      
           }
           catch(error){
-            Alert.alert('Error: ', error + ' fetching streak');
+            Alert.alert('Error: ', error + ' fetching data');
           }
         };
         getStats()
