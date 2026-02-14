@@ -3,6 +3,7 @@ from flask_cors import CORS
 import sqlite3
 from methods import workout
 from methods import overall_stats
+from methods import fetch_data
 
 app = Flask(__name__)
 CORS(app)
@@ -23,7 +24,8 @@ def add_workout():
 def get_workouts():
     try:
         user_id = request.args.get('user_id') 
-        all_workouts = workout.get_all_workouts(user_id)
+        workout_types = fetch_data.get_workout_types(user_id)
+        all_workouts = workout.get_all_workouts(workout_types)
 
         return jsonify({'workouts': all_workouts}), 200
     except Exception as e:
@@ -32,10 +34,14 @@ def get_workouts():
 @app.route("/api/overall-stats", methods = ['GET'])
 def get_streak():
     try:
-        user_id = request.args.get('user_id') 
-        streak = overall_stats.current_streak(user_id)
-        percentage = overall_stats.workout_percentage_overall(user_id)
-        workout_dis = overall_stats.workout_distribution(user_id)
+        user_id = request.args.get('user_id')
+        current_date = fetch_data.get_current_date()
+        workout_dates = fetch_data.get_workout_dates(user_id)
+        streak = overall_stats.current_streak(workout_dates, current_date)
+        percentage = overall_stats.workout_percentage_overall(workout_dates, current_date)
+
+        workout_types = fetch_data.get_workout_types(user_id)
+        workout_dis = overall_stats.workout_distribution(workout_types)
 
         return jsonify({'streak': streak, 'percentage': percentage, 'workoutDis': workout_dis}), 200
     except Exception as e:

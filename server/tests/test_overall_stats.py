@@ -1,0 +1,51 @@
+import unittest
+from datetime import date
+from methods import overall_stats
+
+class TestOverallStats(unittest.TestCase):
+    def test_current_streak_without_today(self):
+        days_worked_out = [{'date': '2026-02-13'}, {'date': '2026-02-12'}, {'date': '2026-02-11'},]
+        current_date = date(2026, 2, 14)
+
+        self.assertEqual(overall_stats.current_streak(days_worked_out, current_date), 3)
+
+    def test_current_streak_with_today(self):
+        days_worked_out = [{'date': '2026-02-14'}, {'date': '2026-02-13'}, {'date': '2026-02-12'}, {'date': '2026-02-11'},]
+        current_date = date(2026, 2, 14)
+
+        self.assertEqual(overall_stats.current_streak(days_worked_out, current_date), 4)
+    
+    def test_current_streak_with_no_workouts_in_last_two(self):
+        days_worked_out = [{'date': '2026-02-12'}, {'date': '2026-02-11'},]
+        current_date = date(2026, 2, 14)
+
+        self.assertEqual(overall_stats.current_streak(days_worked_out, current_date), 0)
+    
+    def test_current_streak_accounts_for_break_in_streak(self):
+        days_worked_out = [{'date': '2026-02-14'}, {'date': '2026-02-13'}, {'date': '2026-02-11'},]
+        current_date = date(2026, 2, 14)
+
+        self.assertEqual(overall_stats.current_streak(days_worked_out, current_date), 2)
+    
+    def test_workout_percentage_without_today(self):
+        days_worked_out = [{'date': '2026-02-13'}, {'date': '2026-02-12'}, {'date': '2026-02-11'}, {'date': '2026-02-09'}]
+        current_date = date(2026, 2, 14)
+
+        self.assertEqual(overall_stats.workout_percentage_overall(days_worked_out, current_date), 80.0)
+    
+    def test_workout_percentage_with_today(self):
+        days_worked_out = [{'date': '2026-02-14'}, {'date': '2026-02-13'}, {'date': '2026-02-11'},]
+        current_date = date(2026, 2, 14)
+
+        self.assertEqual(overall_stats.workout_percentage_overall(days_worked_out, current_date), 75.0)
+    
+    def test_workout_distribution_returns_correct_count(self):
+        all_workout_types = [{'workout_type': 'Legs'}, {'workout_type': 'Push'}, {'workout_type': 'Pull'}, {'workout_type': 'Pull'}]
+        expected_result = {'labels': ['Legs', 'Push', 'Pull'], 'data': [1,1,2]}
+
+        self.assertEqual(overall_stats.workout_distribution(all_workout_types), expected_result)
+
+
+
+if __name__ == '__main__':
+    unittest.main()

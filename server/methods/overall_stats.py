@@ -2,49 +2,31 @@ from datetime import date, timedelta
 from collections import defaultdict
 from lib.supabase import supabase
 
-def current_streak(user_id):
-    response = (
-        supabase.table("Workouts")
-        .select("date") 
-        .eq("UUID", user_id)
-        .order("date", desc=True)
-        .execute()
-    )
+def current_streak(data, current):
+    if worked_out_today(data): 
+        streak = 1
+        data = data[1:]
+    else: streak = 0
 
-    data = response.data
-    
-    current = date.today()
-    streak = 0
+    current -= timedelta(days=1)
+
     for row in data:
         row = date.fromisoformat(row['date'])
-        if streak == 0:
-            if row == current: streak += 1
-            elif row == current-timedelta(days=1):
-                current -= timedelta(days=1)
-                streak += 1
-            else: break
-        else:
-            if row == current: streak += 1
-            else: break
+        if row == current: streak += 1
+        else: break
         current -= timedelta(days=1)
     
     return streak
 
-def workout_percentage_overall(user_id):
-    response = (
-        supabase.table("Workouts")
-        .select("date") 
-        .eq("UUID", user_id)
-        .order("date", desc=False)
-        .execute()
-    )
+def workout_percentage_overall(data, current_day):
+    if not data:
+        return 0
 
-    data = response.data
-    first_day = date.fromisoformat(data[0]['date'])
-    current_day = date.today()
+    first_day = date.fromisoformat(data[-1]['date'])
 
     time_difference = current_day - first_day
-    total_days = time_difference.days
+    if worked_out_today(data): total_days = time_difference.days + 1
+    else: total_days = time_difference.days
     days_worked_out = len(data)
 
     workout_percentage = days_worked_out/total_days * 100
@@ -53,16 +35,12 @@ def workout_percentage_overall(user_id):
 
     return rounded
 
-def workout_distribution(user_id):
-    response = (
-        supabase.table("Workouts")
-        .select("workout_type") 
-        .eq("UUID", user_id)
-        .execute()
-    )
+def worked_out_today(data) -> bool:
+    if not data:
+        return False
+    return date.fromisoformat(data[0]['date']) == date.today()
 
-    data = response.data
-
+def workout_distribution(data):
     workouts = defaultdict(int)
     for row in data:
         workout_type = row['workout_type']
@@ -70,9 +48,7 @@ def workout_distribution(user_id):
     
     data = {
         'labels': list(workouts.keys()),
-        'datasets': [{
-            'data': list(workouts.values()),
-        }]
+        'data': list(workouts.values()),
     }
     return data
 

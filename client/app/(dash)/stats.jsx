@@ -41,7 +41,7 @@ const Stats = () => {
     );
     const formatChartData = (workoutDis) => {
       return workoutDis.labels.map((label, index) => ({
-        value: workoutDis.datasets[0].data[index],
+        value: workoutDis.data[index],
         color: colors[index % colors.length],
         text: label
       }));
@@ -63,7 +63,7 @@ const Stats = () => {
         {workoutDis && workoutDis.labels.map((label, index) => (
         <ThemedView key={index} style={styles.labels}>
           <ThemedView style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors[index % colors.length], marginRight: 8 }} />
-          <ThemedText>{label}: {workoutDis.datasets[0].data[index]}</ThemedText>
+          <ThemedText>{label}: {workoutDis.data[index]}</ThemedText>
         </ThemedView>
       ))}
 

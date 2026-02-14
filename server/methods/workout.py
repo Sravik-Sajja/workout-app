@@ -23,15 +23,7 @@ def add_workout(data):
         'workout_type': workout_type
     }
 
-def get_all_workouts(user_id):
-    response = (
-        supabase.table("Workouts")
-        .select("workout_type") 
-        .eq("UUID", user_id)
-        .execute()
-    )
-    data = response.data
-
+def get_all_workouts(data):
     workout_types = set()
     for row in data:
         workout = row['workout_type']
