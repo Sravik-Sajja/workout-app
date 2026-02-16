@@ -28,7 +28,7 @@ const Register = () => {
         setLoading(false)
 
         if(error){
-            Alert.alert('Error', error)
+            Alert.alert('Error', error.message)
         }
         else {
             Alert.alert('Success', 'Registered!')

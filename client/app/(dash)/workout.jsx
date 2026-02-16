@@ -47,7 +47,7 @@ const Workout = () => {
 
   const handleAddWorkout = async () => {
     if (!selectedDate) {
-      Alert.alert('Missing Date', 'Please select a date to log your workout.');
+      Alert.alert('Missing Date', 'Please select a date to add your workout.');
       return;
     }
     if (!selectedWorkout) {
@@ -68,7 +68,7 @@ const Workout = () => {
       });
 
       if (response.ok) {
-        Alert.alert('Logged!', `${selectedWorkout} logged for ${selectedDate}.`);
+        Alert.alert('Added!', `${selectedWorkout} added for ${selectedDate}.`);
         setSelectedWorkout(null);
         setSelectedDate('');
       } else {
@@ -80,6 +80,9 @@ const Workout = () => {
     } finally {
       setLoading(false);
     }
+    if (newWorkout.trim()) setAllWorkouts([...allWorkouts, newWorkout.trim()])
+    setNewWorkout('') 
+    setShowInput(false)
   };
 
   return (
@@ -163,15 +166,11 @@ const Workout = () => {
           {showInput && (
             <TextInput
               style={[styles.input, { borderColor: Colors.primary, color: theme.title, backgroundColor: theme.uiBackground }]}
-              value={newWorkout} onChangeText={setNewWorkout}
-              onSubmitEditing={() => {
-                if (newWorkout.trim()) {
-                  setAllWorkouts([...allWorkouts, newWorkout.trim()])
-                  setSelectedWorkout(newWorkout.trim())
-                  setNewWorkout('')
-                  setShowInput(false)
-                }
-              }}
+              value={newWorkout}
+              onChangeText={(text) => {
+                setNewWorkout(text)
+                setSelectedWorkout(text.trim())
+                }}
               onBlur={() => { if (!newWorkout.trim()) setShowInput(false) }}
               placeholder="e.g. Upper Body, Legs..."
               placeholderTextColor={theme.text}
@@ -184,9 +183,9 @@ const Workout = () => {
         <ThemedButton
           onPress={handleAddWorkout}
           disabled={loading}
-          style={[styles.logButton, loading && { opacity: 0.6 }]}
+          style={[styles.addButton, loading && { opacity: 0.6 }]}
         >
-          <ThemedText style={[styles.logButtonText, { color: theme.title }]}>
+          <ThemedText style={[styles.addButtonText, { color: theme.title }]}>
             {loading ? 'Adding...' : 'Add Workout'}
           </ThemedText>
         </ThemedButton>
@@ -270,13 +269,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 4,
   },
-  logButton: {
+  addButton: {
     padding: 18,
     borderRadius: 14,
     alignItems: 'center',
     marginTop: 4,
   },
-  logButtonText: {
+  addButtonText: {
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
