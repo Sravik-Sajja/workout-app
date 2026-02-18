@@ -7,6 +7,7 @@ import { Calendar } from 'react-native-calendars';
 import { supabase } from '../../lib/supabase'
 import { useFocusEffect } from "expo-router";
 import { Colors } from "../../constants/Colors"
+import Spacer from "../../components/Spacer";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -87,6 +88,7 @@ const Workout = () => {
 
   return (
     <ThemedView style={styles.container}>
+      <Spacer />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
 
         <ThemedView style={styles.section}>
