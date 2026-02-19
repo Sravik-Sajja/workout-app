@@ -16,6 +16,8 @@ const Stats = () => {
 
   const [currentStreak, setCurrentStreak] = useState(0)
   const [longestStreak, setLongestStreak] = useState(0)
+  const [longestStreakStart, setLongestStreakStart] = useState('')
+  const [longestStreakEnd, setLongestStreakEnd] = useState('')
   const [workoutDis, setWorkoutDis] = useState(null)
   const [percentage, setPercentage] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -42,8 +44,16 @@ const Stats = () => {
           }
           const dataResponse = await fetch(`${API_URL}/api/overall-stats?user_id=${user.id}`);
           const fullData = await dataResponse.json();
-          setCurrentStreak(fullData.streak);
-          setLongestStreak(fullData.longest)
+          if (fullData.error) {
+            Alert.alert('API Error', fullData.error);
+            setLoading(false);
+            return;
+          }
+
+          setCurrentStreak(fullData.current_streak);
+          setLongestStreak(fullData.longest_streak)
+          setLongestStreakStart(fullData.longest_streak_start)
+          setLongestStreakEnd(fullData.longest_streak_end)
           setPercentage(fullData.percentage);
           setWorkoutDis(fullData.workoutDis);
           setLoading(false)
@@ -100,6 +110,27 @@ const Stats = () => {
               </ThemedText>
               <ThemedText style={styles.statUnit}>days</ThemedText>
             </View>
+            {longestStreakStart && longestStreakEnd && (() => {
+              const start = new Date(longestStreakStart + 'T12:00:00Z');
+              const end = new Date(longestStreakEnd + 'T12:00:00Z');
+              const sameYear = start.getFullYear() === end.getFullYear();
+              const startStr = start.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: sameYear ? undefined : 'numeric'
+              });
+              const endStr = end.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+              });
+              
+              return (
+                <ThemedText style={[styles.dateRange, { color: theme.text }]}>
+                  {startStr} - {endStr}
+                </ThemedText>
+            );
+          })()}
           </View>
         </View>
 
@@ -258,5 +289,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
     opacity: 0.6,
+  },
+  dateRange: {
+    fontSize: 12,
+    opacity: 0.6,
+    marginTop: 4,
   },
 });

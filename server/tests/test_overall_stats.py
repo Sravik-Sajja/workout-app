@@ -33,25 +33,31 @@ class TestOverallStats(unittest.TestCase):
         days_worked_out = [{'date': '2026-02-11'}, {'date': '2026-02-12'}, {'date': '2026-02-14'},]
         oldest_date = date(2026, 2, 11)
 
-        self.assertEqual(overall_stats.longest_streak(days_worked_out, oldest_date), 2)
+        self.assertEqual(overall_stats.longest_streak(days_worked_out, oldest_date), (2, date(2026, 2, 11), date(2026, 2, 12)))
     
     def test_longest_streak_is_current(self):
         days_worked_out = [{'date': '2026-02-11'}, {'date': '2026-02-13'}, {'date': '2026-02-14'},]
         oldest_date = date(2026, 2, 11)
 
-        self.assertEqual(overall_stats.longest_streak(days_worked_out, oldest_date), 2)
+        self.assertEqual(overall_stats.longest_streak(days_worked_out, oldest_date), (2, date(2026, 2, 13), date(2026, 2, 14)))
     
     def test_longest_streak_is_all(self):
         days_worked_out = [{'date': '2026-02-10'}, {'date': '2026-02-11'}, {'date': '2026-02-12'}, {'date': '2026-02-13'}, {'date': '2026-02-14'},]
         oldest_date = date(2026, 2, 10)
 
-        self.assertEqual(overall_stats.longest_streak(days_worked_out, oldest_date), 5)
+        self.assertEqual(overall_stats.longest_streak(days_worked_out, oldest_date), (5, date(2026, 2, 10), date(2026, 2, 14)))
     
     def test_longest_streak_is_tied(self):
         days_worked_out = [{'date': '2026-02-10'}, {'date': '2026-02-11'}, {'date': '2026-02-13'}, {'date': '2026-02-14'},]
         oldest_date = date(2026, 2, 10)
 
-        self.assertEqual(overall_stats.longest_streak(days_worked_out, oldest_date), 2)
+        self.assertEqual(overall_stats.longest_streak(days_worked_out, oldest_date), (2, date(2026, 2, 10), date(2026, 2, 11)))
+    
+    def test_longest_streak_single_day(self):
+        days_worked_out = [{'date': '2026-02-10'}]
+        oldest_date = date(2026, 2, 10)
+
+        self.assertEqual(overall_stats.longest_streak(days_worked_out, oldest_date), (1, date(2026, 2, 10), date(2026, 2, 10)))
     
     #testing workout percentage
     def test_workout_percentage_without_today(self):

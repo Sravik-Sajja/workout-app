@@ -36,5 +36,7 @@ def get_current_date():
 
 def get_oldest_date(user_id):
     data = get_workout_dates_ascending(user_id)
+    if not data:
+        return None
     oldest_date = data[0]
     return date.fromisoformat(oldest_date['date'])
