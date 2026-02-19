@@ -15,6 +15,7 @@ const Stats = () => {
   const theme = Colors[colorScheme]
 
   const [currentStreak, setCurrentStreak] = useState(0)
+  const [longestStreak, setLongestStreak] = useState(0)
   const [workoutDis, setWorkoutDis] = useState(null)
   const [percentage, setPercentage] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -42,6 +43,7 @@ const Stats = () => {
           const dataResponse = await fetch(`${API_URL}/api/overall-stats?user_id=${user.id}`);
           const fullData = await dataResponse.json();
           setCurrentStreak(fullData.streak);
+          setLongestStreak(fullData.longest)
           setPercentage(fullData.percentage);
           setWorkoutDis(fullData.workoutDis);
           setLoading(false)
@@ -87,6 +89,16 @@ const Stats = () => {
                 {percentage}
               </ThemedText>
               <ThemedText style={styles.statUnit}>%</ThemedText>
+            </View>
+          </View>
+
+          <View style={[styles.statCard, { backgroundColor: theme.uiBackground }]}>
+            <ThemedText style={styles.statLabel}>LONGEST STREAK</ThemedText>
+            <View style={styles.statValueRow}>
+              <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
+                {longestStreak}
+              </ThemedText>
+              <ThemedText style={styles.statUnit}>days</ThemedText>
             </View>
           </View>
         </View>
@@ -159,10 +171,11 @@ const styles = StyleSheet.create({
   },
   cardsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
   statCard: {
-    flex: 1,
+    width: '48%',
     borderRadius: 16,
     padding: 20,
     gap: 8,
