@@ -78,8 +78,12 @@ class TestOverallStats(unittest.TestCase):
         expected_result = {'labels': ['Legs', 'Push', 'Pull'], 'data': [1,1,2]}
 
         self.assertEqual(overall_stats.workout_distribution(all_workout_types), expected_result)
+    
+    def test_no_duplicate_days_removes_duplicates(self):
+        days_worked_out = [{'date': '2026-02-13'}, {'date': '2026-02-13'}, {'date': '2026-02-12'}, {'date': '2026-02-09'}]
+        expected_result = [{'date': '2026-02-13'}, {'date': '2026-02-12'}, {'date': '2026-02-09'}]
 
-
+        self.assertEqual(overall_stats._no_duplicate_days(days_worked_out), expected_result)
 
 if __name__ == '__main__':
     unittest.main()

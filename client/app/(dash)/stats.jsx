@@ -88,7 +88,7 @@ const Stats = () => {
               <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
                 {currentStreak}
               </ThemedText>
-              <ThemedText style={styles.statUnit}>days</ThemedText>
+              <ThemedText style={styles.statUnit}>{currentStreak === 1 ? "day" : "days"}</ThemedText>
             </View>
           </View>
 
@@ -108,7 +108,7 @@ const Stats = () => {
               <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
                 {longestStreak}
               </ThemedText>
-              <ThemedText style={styles.statUnit}>days</ThemedText>
+              <ThemedText style={styles.statUnit}>{longestStreak === 1 ? "day" : "days"}</ThemedText>
             </View>
             {longestStreakStart && longestStreakEnd && (() => {
               const start = new Date(longestStreakStart + 'T12:00:00Z');

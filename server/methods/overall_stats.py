@@ -2,8 +2,8 @@ from datetime import date, timedelta
 from collections import defaultdict
 from lib.supabase import supabase
 
-#add duplicate day handling
 def current_streak(data, current):
+    data = _no_duplicate_days(data)
     if _worked_out_today(data, current): 
         streak = 1
         data = data[1:]
@@ -20,6 +20,7 @@ def current_streak(data, current):
     return streak
 
 def longest_streak(data, oldest_day):
+    data = _no_duplicate_days(data)
     current_date = oldest_day
     max_streak = 0
     max_start_date = max_end_date = ""
@@ -43,17 +44,11 @@ def longest_streak(data, oldest_day):
 
     return max_streak, max_start_date, max_end_date
 
-def _set_max_date(current_streak, current_start_date, current_date):
-    max_streak = current_streak
-    max_start_date = current_start_date
-    max_end_date = current_date - timedelta(days=1)
-
-    return max_streak, max_start_date, max_end_date
-
 def workout_percentage_overall(data, current_day):
     if not data:
         return 0
-
+    
+    data = _no_duplicate_days(data)
     first_day = date.fromisoformat(data[-1]['date'])
 
     time_difference = current_day - first_day
@@ -67,11 +62,6 @@ def workout_percentage_overall(data, current_day):
 
     return rounded
 
-def _worked_out_today(data, current) -> bool:
-    if not data:
-        return False
-    return date.fromisoformat(data[0]['date']) == current
-
 def workout_distribution(data):
     workouts = defaultdict(int)
     for row in data:
@@ -83,4 +73,22 @@ def workout_distribution(data):
         'data': list(workouts.values()),
     }
     return data
+
+def _no_duplicate_days(data):
+    no_dup = []
+    for row in data:
+        if row not in no_dup: no_dup.append(row)
+    return no_dup
+
+def _worked_out_today(data, current) -> bool:
+    if not data:
+        return False
+    return date.fromisoformat(data[0]['date']) == current
+
+def _set_max_date(current_streak, current_start_date, current_date):
+    max_streak = current_streak
+    max_start_date = current_start_date
+    max_end_date = current_date - timedelta(days=1)
+
+    return max_streak, max_start_date, max_end_date
 
