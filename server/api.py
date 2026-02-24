@@ -28,7 +28,10 @@ def get_workouts():
         workout_types = fetch_data.get_workout_types(user_id)
         all_workouts = workout.get_all_workouts(workout_types)
 
-        return jsonify({'workouts': all_workouts}), 200
+        all_dates = fetch_data.get_workout_dates_ascending(user_id)
+        date_list = [row['date'] for row in all_dates]
+
+        return jsonify({'workouts': all_workouts, 'all_dates': date_list}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -38,6 +41,17 @@ def get_overall_stats():
         user_id = request.args.get('user_id')
         return jsonify(calc.calculate_overall_stats(user_id)), 200
     
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/api/get-workout-details", methods = ['GET'])
+def get_details():
+    try:
+        user_id = request.args.get('user_id')
+        date = request.args.get('date')
+
+        workout_details = fetch_data.get_specific_workout(user_id, date)
+        return jsonify({'workout_details': workout_details}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

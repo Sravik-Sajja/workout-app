@@ -1,13 +1,14 @@
 import { useCallback, useState } from "react";
 import { StyleSheet, TextInput, Alert, ScrollView, Pressable, useColorScheme, View } from 'react-native';
-import ThemedText from "../../components/ThemedText";
-import ThemedView from "../../components/ThemedView";
-import ThemedButton from "../../components/ThemedButton";
+import ThemedText from "../../../components/ThemedText";
+import ThemedView from "../../../components/ThemedView";
+import ThemedButton from "../../../components/ThemedButton";
 import { Calendar } from 'react-native-calendars';
-import { supabase } from '../../lib/supabase'
-import { useFocusEffect } from "expo-router";
-import { Colors } from "../../constants/Colors"
-import Spacer from "../../components/Spacer";
+import { supabase } from '../../../lib/supabase'
+import { router, useFocusEffect } from "expo-router";
+import { Colors } from "../../../constants/Colors"
+import Spacer from "../../../components/Spacer";
+import ThemedCalendar from "../../../components/ThemedCalender";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -16,6 +17,7 @@ const Workout = () => {
   const theme = Colors[colorScheme]
 
   const [selectedDate, setSelectedDate] = useState('');
+  const [markedDates, setMarkedDates] = useState('')
   const [loading, setLoading] = useState(false);
   const [allWorkouts, setAllWorkouts] = useState([])
   const [selectedWorkout, setSelectedWorkout] = useState(null)
@@ -27,13 +29,19 @@ const Workout = () => {
 
   useFocusEffect(
     useCallback(() => {
-      const handleShowWorkouts = async () => {
+      const handleDisplay = async () => {
         let user_id = await getUser()
         const response = await fetch(`${API_URL}/api/get-workouts?user_id=${user_id}`)
         const fullData = await response.json();
         setAllWorkouts(fullData.workouts)
+        
+        const marked = {};
+        fullData.all_dates.forEach(date => {
+          marked[date] = { marked: true, dotColor: Colors.primary };
+        });
+        setMarkedDates(marked);
       }
-      handleShowWorkouts()
+      handleDisplay()
     }, [])
   );
 
@@ -86,6 +94,17 @@ const Workout = () => {
     setShowInput(false)
   };
 
+  const handleSelectDay = async (day) => {
+    if (markedDates[day.dateString]) {
+      const userId = await getUser();
+      router.push({
+        pathname: '/(dash)/workout/workoutDetails',
+        params: { date: day.dateString, userId: userId}
+      })
+    }
+    setSelectedDate(day.dateString)
+  }
+
   return (
     <ThemedView style={styles.container}>
       <Spacer />
@@ -93,27 +112,11 @@ const Workout = () => {
 
         <ThemedView style={styles.section}>
           <ThemedText style={styles.sectionLabel}>SELECT DATE</ThemedText>
-          <Calendar
-            onDayPress={(day) => setSelectedDate(day.dateString)}
-            markedDates={{
-              [selectedDate]: { selected: true, selectedColor: Colors.primary },
-            }}
+          <ThemedCalendar
+            onDayPress={handleSelectDay}
+            markedDates={markedDates}
+            selectedDate={selectedDate}
             maxDate={todayString}
-            theme={{
-              backgroundColor: 'transparent',
-              calendarBackground: 'transparent',
-              textSectionTitleColor: theme.text,
-              selectedDayBackgroundColor: Colors.primary,
-              selectedDayTextColor: theme.title,
-              todayTextColor: Colors.primary,
-              dayTextColor: theme.title,
-              textDisabledColor: theme.text + '30',
-              arrowColor: Colors.primary,
-              monthTextColor: theme.title,
-              textMonthFontWeight: '700',
-              textDayFontSize: 14,
-              textMonthFontSize: 16,
-            }}
           />
           {selectedDate ? (
             <ThemedView style={[styles.selectedDateBadge, { backgroundColor: Colors.primary + '20' }]}>
