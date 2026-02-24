@@ -18,8 +18,10 @@ const Stats = () => {
   const [longestStreak, setLongestStreak] = useState(0)
   const [longestStreakStart, setLongestStreakStart] = useState('')
   const [longestStreakEnd, setLongestStreakEnd] = useState('')
+  const [bestMonthPercentage, setBestMonthPercentage] = useState('')
+  const [bestMonthName, setBestMonthName] = useState('')
   const [workoutDis, setWorkoutDis] = useState(null)
-  const [percentage, setPercentage] = useState(0)
+  const [overallPercentage, setOverallPercentage] = useState(0)
   const [loading, setLoading] = useState(true)
 
   // Use theme colors
@@ -54,8 +56,10 @@ const Stats = () => {
           setLongestStreak(fullData.longest_streak)
           setLongestStreakStart(fullData.longest_streak_start)
           setLongestStreakEnd(fullData.longest_streak_end)
-          setPercentage(fullData.percentage);
-          setWorkoutDis(fullData.workoutDis);
+          setOverallPercentage(fullData.overall_percentage);
+          setBestMonthPercentage(fullData.best_month_percentage)
+          setBestMonthName(fullData.best_month_name)
+          setWorkoutDis(fullData.workout_dis);
           setLoading(false)
         }
         catch (error) {
@@ -96,7 +100,7 @@ const Stats = () => {
             <ThemedText style={styles.statLabel}>PERCENTAGE</ThemedText>
             <View style={styles.statValueRow}>
               <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
-                {percentage}
+                {overallPercentage}
               </ThemedText>
               <ThemedText style={styles.statUnit}>%</ThemedText>
             </View>
@@ -131,6 +135,16 @@ const Stats = () => {
                 </ThemedText>
             );
           })()}
+          </View>
+          <View style={[styles.statCard, { backgroundColor: theme.uiBackground }]}>
+            <ThemedText style={styles.statLabel}>BEST MONTH</ThemedText>
+            <View style={styles.statValueRow}>
+              <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
+                {bestMonthPercentage}
+              </ThemedText>
+              <ThemedText style={styles.statUnit}>%</ThemedText>
+            </View>
+            <ThemedText style={[styles.dateRange, { color: theme.text }]}>{bestMonthName}</ThemedText>
           </View>
         </View>
 

@@ -72,6 +72,32 @@ class TestOverallStats(unittest.TestCase):
 
         self.assertEqual(overall_stats.workout_percentage_overall(days_worked_out, current_date), 75.0)
     
+    #testing best month percentage
+    def test_best_month_returns_correct_percentage_and_name(self):
+        days_worked_out = [{'date': '2026-01-13'}, {'date': '2026-01-14'}, {'date': '2026-02-11'},]
+        oldest_date = date(2025, 1, 13)
+        self.assertEqual(overall_stats.best_month_overall(days_worked_out, oldest_date), (6.5, 'January 2026'))
+    
+    def test_best_month_returns_correct_percentage_and_name_when_same_workouts_in_different_months(self):
+        days_worked_out = [{'date': '2026-01-13'}, {'date': '2026-01-14'}, {'date': '2026-02-11'}, {'date': '2026-02-13'}]
+        oldest_date = date(2025, 1, 13)
+        self.assertEqual(overall_stats.best_month_overall(days_worked_out, oldest_date), (7.1, 'February 2026'))
+    
+    def test_best_month_with_february_leap_year(self):
+        days_worked_out = [{'date': '2024-02-10'}, {'date': '2024-02-20'}, {'date': '2024-02-29'}]
+        oldest_date = date(2024, 2, 1)
+        self.assertEqual(overall_stats.best_month_overall(days_worked_out, oldest_date), (10.3, 'February 2024'))
+    
+    def test_best_month_with_no_workouts(self):
+        days_worked_out = []
+        oldest_date = date(2025, 1, 1)
+        self.assertEqual(overall_stats.best_month_overall(days_worked_out, oldest_date), (0, None))
+    
+    def test_best_month_with_perfect_month(self):
+        days_worked_out = [{'date': f'2026-01-{i:02d}'} for i in range(1, 32)]
+        oldest_date = date(2026, 1, 1)
+        self.assertEqual(overall_stats.best_month_overall(days_worked_out, oldest_date), (100.0, 'January 2026'))
+    
     #testing workout distribution
     def test_workout_distribution_returns_correct_count(self):
         all_workout_types = [{'workout_type': 'Legs'}, {'workout_type': 'Push'}, {'workout_type': 'Pull'}, {'workout_type': 'Pull'}]

@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+import calendar
 from collections import defaultdict
 from lib.supabase import supabase
 
@@ -61,6 +62,31 @@ def workout_percentage_overall(data, current_day):
     rounded = round(workout_percentage, 1)
 
     return rounded
+
+def best_month_overall(data, oldest_date):
+    if oldest_date == None: return(0, None)
+    current_date = oldest_date
+
+    max_month_name = None
+    max_percentage = 0
+
+    while current_date<date.today():
+        _, num_days = calendar.monthrange(current_date.year, current_date.month)
+        end_of_month_date = current_date.replace(day=num_days)
+
+        num_workouts = sum(1 for row in data 
+                          if current_date <= date.fromisoformat(row['date']) <= end_of_month_date)
+        total_days = num_days
+        workout_percentage = num_workouts/total_days * 100
+        rounded = round(workout_percentage, 1)
+
+        if rounded>max_percentage:
+            max_percentage = rounded
+            max_month_name = current_date.strftime('%B %Y')
+        
+        current_date = end_of_month_date + timedelta(days=1)
+
+    return max_percentage, max_month_name
 
 def workout_distribution(data):
     workouts = defaultdict(int)

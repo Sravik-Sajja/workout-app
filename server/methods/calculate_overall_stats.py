@@ -12,6 +12,7 @@ def calculate_overall_stats(user_id):
     longest_streak, longest_streak_start, longest_streak_end = overall_stats.longest_streak(workout_dates_asc, oldest_date)
 
     percentage = overall_stats.workout_percentage_overall(workout_dates_des, current_date)
+    best_month_percentage, best_month_name = overall_stats.best_month_overall(workout_dates_asc, oldest_date)
 
     workout_types = fetch_data.get_workout_types(user_id)
     workout_dis = overall_stats.workout_distribution(workout_types)
@@ -21,6 +22,8 @@ def calculate_overall_stats(user_id):
         "longest_streak": longest_streak,
         "longest_streak_start": str(longest_streak_start),
         "longest_streak_end": str(longest_streak_end),
-        "percentage": percentage,
-        "workoutDis": workout_dis,
+        "overall_percentage": percentage,
+        "best_month_percentage": best_month_percentage,
+        "best_month_name": best_month_name,
+        "workout_dis": workout_dis,
     }
