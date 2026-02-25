@@ -9,8 +9,6 @@ from methods import calculate_overall_stats as calc
 app = Flask(__name__)
 CORS(app)
 
-    
-
 @app.route("/api/add-workout", methods = ['POST'])
 def add_workout():
     try:
@@ -32,6 +30,18 @@ def get_workouts():
         date_list = [row['date'] for row in all_dates]
 
         return jsonify({'workouts': all_workouts, 'all_dates': date_list}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/api/get-exercises",  methods = ['GET'])
+def get_exercises():
+    try:
+        user_id = request.args.get('user_id')
+        workout_type = request.args.get('workout_type')
+        all_exercises = fetch_data.get_exercises(user_id, workout_type) 
+
+        print(all_exercises)
+        return jsonify({'exercises': all_exercises}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

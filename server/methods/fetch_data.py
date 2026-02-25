@@ -42,6 +42,44 @@ def get_specific_workout(user_id, date):
     
     return response.data
 
+def get_exercises(user_id, workout_type):
+    response_from_workouts = (
+        supabase.table("Workouts")
+        .select("workout_id") 
+        .eq("UUID", user_id)
+        .eq("workout_type", workout_type)
+        .order("date", desc=True)
+        .execute()
+    )
+    if not response_from_workouts.data:
+        return []
+
+    last_workout = response_from_workouts.data[0]['workout_id']
+
+    response_from_exercises = (
+        supabase.table("Exercises")
+        .select("exercise_id, exercise_type") 
+        .eq("workout_id", last_workout)
+        .execute()
+    )
+
+    exercises = []
+    for exercise in response_from_exercises.data:
+        response_from_sets = (
+            supabase.table("Sets")
+            .select("weight, reps")
+            .eq("exercise_id", exercise['exercise_id'])
+            .execute()
+        )
+        
+        exercises.append({
+            'name': exercise['exercise_type'],
+            'sets': [{'weight': s['weight'], 'reps': s['reps']} for s in response_from_sets.data]
+        })
+    
+    return exercises
+
+
 def get_current_date():
     return date.today()
 

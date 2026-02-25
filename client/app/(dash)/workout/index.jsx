@@ -9,20 +9,25 @@ import { router, useFocusEffect } from "expo-router";
 import { Colors } from "../../../constants/Colors"
 import Spacer from "../../../components/Spacer";
 import ThemedCalendar from "../../../components/ThemedCalender";
+import ExerciseForm from "../../../components/ExerciseForm";
+import { Modal } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
 const Workout = () => {
   const colorScheme = useColorScheme() || 'light'
   const theme = Colors[colorScheme]
+  const [userId, setUserId] = useState('')
 
   const [selectedDate, setSelectedDate] = useState('');
   const [markedDates, setMarkedDates] = useState('')
   const [loading, setLoading] = useState(false);
   const [allWorkouts, setAllWorkouts] = useState([])
   const [selectedWorkout, setSelectedWorkout] = useState(null)
-  const [showInput, setShowInput] = useState(false)
   const [newWorkout, setNewWorkout] = useState('')
+  const [showExerciseModal, setShowExerciseModal] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState(null);
 
   const today = new Date();
   const todayString = today.toISOString().split('T')[0];
@@ -54,6 +59,16 @@ const Workout = () => {
     return user.id
   }
 
+  const handleShowForm = async () => {
+    if (!selectedDate) {
+      Alert.alert('Missing Date', 'Please select a date.');
+      return;
+    }
+    const user_id = await getUser();
+    setUserId(user_id);
+    setShowExerciseModal(true)
+  }
+
   const handleAddWorkout = async () => {
     if (!selectedDate) {
       Alert.alert('Missing Date', 'Please select a date to add your workout.');
@@ -63,19 +78,30 @@ const Workout = () => {
       Alert.alert('Missing Workout', 'Please select or add a workout type.');
       return;
     }
-    setLoading(true)
+    
+    setLoading(true);
+    
     try {
-      let user_id = await getUser()
+      const user_id = await getUser();
+      
+      const exercisesResponse = await fetch(`${API_URL}/api/get-exercises?user_id=${user_id}&workout_type=${selectedWorkout}`);
+      const exercisesData = await exercisesResponse.json();
+      const exercisesToAdd = exercisesData.exercises || [];
+      console.log(exercisesToAdd)
+      
       const response = await fetch(`${API_URL}/api/add-workout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: user_id,
           date: selectedDate,
-          workout_type: selectedWorkout
+          workout_type: selectedWorkout,
+          exercises: exercisesToAdd
         })
       });
 
+      const result = await response.json();
+  
       if (response.ok) {
         Alert.alert('Added!', `${selectedWorkout} added for ${selectedDate}.`);
         setSelectedWorkout(null);
@@ -89,9 +115,6 @@ const Workout = () => {
     } finally {
       setLoading(false);
     }
-    if (newWorkout.trim()) setAllWorkouts([...allWorkouts, newWorkout.trim()])
-    setNewWorkout('') 
-    setShowInput(false)
   };
 
   const handleSelectDay = async (day) => {
@@ -149,40 +172,34 @@ const Workout = () => {
                   <ThemedText style={[styles.cardText, isSelected && { color: Colors.primary }]}>
                     {workout}
                   </ThemedText>
+
+                  <Pressable 
+                    onPress={async (e) => {
+                      e.stopPropagation();
+                      setSelectedWorkout(workout);
+                      setEditingWorkout(workout);
+                      await handleShowForm();
+                    }}
+                    style={[styles.editIcon, { padding: 4 }]}
+                  >
+                    <Ionicons name="pencil" size={16} color={Colors.primary} />
+                  </Pressable>
                 </Pressable>
               );
             })}
 
-            {!showInput && (
-              <Pressable
-                onPress={() => setShowInput(true)}
-                style={({ pressed }) => [
-                  styles.card,
-                  styles.addCard,
-                  { borderColor: theme.text + '40', backgroundColor: 'transparent' },
-                  pressed && { opacity: 0.6 }
-                ]}
-              >
-                <ThemedText style={[styles.addCardText, { color: theme.text }]}>+ New</ThemedText>
-              </Pressable>
-            )}
+            <Pressable
+              onPress={handleShowForm}
+              style={({ pressed }) => [
+                styles.card,
+                styles.addCard,
+                { borderColor: theme.text + '40', backgroundColor: 'transparent' },
+                pressed && { opacity: 0.6 }
+              ]}
+            >
+              <ThemedText style={[styles.addCardText, { color: theme.text }]}>+ New</ThemedText>
+            </Pressable>
           </ThemedView>
-
-          {showInput && (
-            <TextInput
-              style={[styles.input, { borderColor: Colors.primary, color: theme.title, backgroundColor: theme.uiBackground }]}
-              value={newWorkout}
-              onChangeText={(text) => {
-                setNewWorkout(text)
-                setSelectedWorkout(text.trim())
-                }}
-              onBlur={() => { if (!newWorkout.trim()) setShowInput(false) }}
-              placeholder="e.g. Upper Body, Legs..."
-              placeholderTextColor={theme.text}
-              autoFocus
-              returnKeyType="done"
-            />
-          )}
         </View>
 
         <ThemedButton
@@ -194,6 +211,23 @@ const Workout = () => {
             {loading ? 'Adding...' : 'Add Workout'}
           </ThemedText>
         </ThemedButton>
+
+        <Modal
+          visible={showExerciseModal}
+          animationType="slide"
+          onRequestClose={() => setShowExerciseModal(false)}
+        >
+          <ExerciseForm 
+            date={selectedDate}
+            workoutType={editingWorkout}
+            userId={userId}
+            isNewWorkout={!editingWorkout}
+            onClose={() => {
+              setShowExerciseModal(false)
+              setEditingWorkout(null);
+            }}
+          />
+        </Modal>
 
       </ScrollView>
     </ThemedView>
@@ -284,5 +318,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  editIcon: {
+    position: 'absolute',
+    top: 3,
+    right: 3,
   },
 });
