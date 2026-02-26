@@ -87,8 +87,7 @@ const Workout = () => {
       const exercisesResponse = await fetch(`${API_URL}/api/get-exercises?user_id=${user_id}&workout_type=${selectedWorkout}`);
       const exercisesData = await exercisesResponse.json();
       const exercisesToAdd = exercisesData.exercises || [];
-      console.log(exercisesToAdd)
-      
+            
       const response = await fetch(`${API_URL}/api/add-workout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

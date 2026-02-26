@@ -40,7 +40,6 @@ def get_exercises():
         workout_type = request.args.get('workout_type')
         all_exercises = fetch_data.get_exercises(user_id, workout_type) 
 
-        print(all_exercises)
         return jsonify({'exercises': all_exercises}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

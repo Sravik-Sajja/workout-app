@@ -16,6 +16,7 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
   const [exercises, setExercises] = useState([]);
   const [currentExerciseName, setCurrentExerciseName] = useState('');
   const [sets, setSets] = useState([{ weight: '', reps: '' }]);
+  const [editingExerciseIndex, setEditingExerciseIndex] = useState(null);
 
   const addSet = () => {
     setSets([...sets, { weight: '', reps: '' }]);
@@ -41,12 +42,23 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
       return;
     }
 
-    setExercises([...exercises, { 
-      name: currentExerciseName.trim(), 
-      sets: [...sets] 
-    }]);
+    if (editingExerciseIndex !== null) {
+        // Update existing exercise
+        const newExercises = [...exercises];
+        newExercises[editingExerciseIndex] = { 
+          name: currentExerciseName.trim(), 
+          sets: [...sets] 
+        };
+        setExercises(newExercises);
+        setEditingExerciseIndex(null);
+      } else {
+        // Add new exercise
+        setExercises([...exercises, { 
+          name: currentExerciseName.trim(), 
+          sets: [...sets] 
+        }]);
+      }
     
-    // Reset for next exercise
     setCurrentExerciseName('');
     setSets([{ weight: '', reps: '' }]);
   };
@@ -59,6 +71,11 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
     if (exercises.length === 0) {
       Alert.alert('Error', 'Add at least one exercise');
       return;
+    }
+
+    if (!workoutName || workoutName.trim().length === 0){
+        Alert.alert('Error', 'Add a workout name');
+        return
     }
 
     try {
@@ -106,31 +123,34 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
       <Spacer />
         
       <View style={styles.header}>
-          {isNewWorkout ? (
-            <>
-              <ThemedText style={styles.label}>Workout Name</ThemedText>
-              <TextInput
+            <ThemedText style={styles.label}>Workout Name</ThemedText>
+            <TextInput
                 style={[styles.input, { borderColor: Colors.primary, color: theme.title, backgroundColor: theme.background }]}
                 value={workoutName}
                 onChangeText={setWorkoutName}
                 placeholder="e.g., Upper Body, Legs..."
                 placeholderTextColor={theme.text}
                 autoFocus
-              />
-            </>
-          ) : (
-            <>
-              <ThemedText style={styles.title}>{workoutName}</ThemedText>
-              <ThemedText style={[styles.date, { color: theme.text }]}>{date}</ThemedText>
-            </>
-          )}
+            />
+            <ThemedText style={[styles.date, { color: theme.text }]}>{date}</ThemedText>
         </View>
 
         {exercises.length > 0 && (
           <View style={[styles.section, { backgroundColor: theme.uiBackground }]}>
             <ThemedText style={styles.sectionLabel}>EXERCISES</ThemedText>
             {exercises.map((exercise, exIndex) => (
-              <View key={exIndex} style={styles.exerciseCard}>
+              <Pressable
+              key={exIndex}
+              onPress={() => {
+                setCurrentExerciseName(exercise.name);
+                setSets(exercise.sets.map(set => ({ 
+                    weight: String(set.weight), 
+                    reps: String(set.reps) 
+                })));
+                setEditingExerciseIndex(exIndex);
+              }}
+              style={styles.exerciseCard}
+            >
                 <View style={styles.exerciseHeader}>
                   <ThemedText style={styles.exerciseName}>{exercise.name}</ThemedText>
                   <Pressable onPress={() => removeExercise(exIndex)}>
@@ -142,13 +162,13 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
                     Set {setIndex + 1}: {set.weight} lbs × {set.reps} reps
                   </ThemedText>
                 ))}
-              </View>
+              </Pressable>
             ))}
           </View>
         )}
 
         <View style={[styles.section, { backgroundColor: theme.uiBackground }]}>
-          <ThemedText style={styles.sectionLabel}>ADD EXERCISE</ThemedText>
+          <ThemedText style={styles.sectionLabel}>SAVE EXERCISE</ThemedText>
           
           <TextInput
             style={[styles.input, { borderColor: theme.text, color: theme.title, backgroundColor: theme.background }]}
@@ -202,7 +222,7 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
           </Pressable>
 
           <ThemedButton onPress={addExercise} style={styles.addExerciseButton}>
-            <ThemedText style={styles.buttonText}>Add Exercise</ThemedText>
+            <ThemedText style={styles.buttonText}>Save Exercise</ThemedText>
           </ThemedButton>
         </View>
 
