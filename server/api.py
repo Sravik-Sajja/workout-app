@@ -19,6 +19,7 @@ def add_workout():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+#to show pre-existing workouts
 @app.route("/api/get-workouts", methods = ['GET'])
 def get_workouts():
     try:
@@ -33,12 +34,13 @@ def get_workouts():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+#to show any pre-existing exercises for a certain workout
 @app.route("/api/get-exercises",  methods = ['GET'])
 def get_exercises():
     try:
         user_id = request.args.get('user_id')
         workout_type = request.args.get('workout_type')
-        all_exercises = fetch_data.get_exercises(user_id, workout_type) 
+        all_exercises = fetch_data.get_recent_exercises(user_id, workout_type) 
 
         return jsonify({'exercises': all_exercises}), 200
     except Exception as e:
@@ -53,14 +55,15 @@ def get_overall_stats():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+#to show workout details of past workouts
 @app.route("/api/get-workout-details", methods = ['GET'])
 def get_details():
     try:
         user_id = request.args.get('user_id')
         date = request.args.get('date')
 
-        workout_details = fetch_data.get_specific_workout(user_id, date)
-        return jsonify({'workout_details': workout_details}), 200
+        workout_type, workout_details = fetch_data.get_specific_workout(user_id, date)
+        return jsonify({'workout_type': workout_type, 'workout_details': workout_details}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

@@ -32,17 +32,21 @@ def get_workout_types(user_id):
     return response.data
 
 def get_specific_workout(user_id, date):
-    response = (
+    response_of_workouts = (
         supabase.table("Workouts")
-        .select("workout_type") 
+        .select("workout_type", "workout_id") 
         .eq("UUID", user_id)
         .eq("date", date)
         .execute()
     )
-    
-    return response.data
 
-def get_exercises(user_id, workout_type):
+    workout_id = response_of_workouts.data[0]["workout_id"]
+    workout_type = response_of_workouts.data[0]["workout_type"]
+    all_exercises = fetch_exercises(workout_id)
+    return workout_type, all_exercises
+    
+
+def get_recent_exercises(user_id, workout_type):
     response_from_workouts = (
         supabase.table("Workouts")
         .select("workout_id") 
@@ -56,10 +60,14 @@ def get_exercises(user_id, workout_type):
 
     last_workout = response_from_workouts.data[0]['workout_id']
 
+    return fetch_exercises(last_workout)
+
+
+def fetch_exercises(workout_id):
     response_from_exercises = (
         supabase.table("Exercises")
         .select("exercise_id, exercise_type") 
-        .eq("workout_id", last_workout)
+        .eq("workout_id", workout_id)
         .execute()
     )
 

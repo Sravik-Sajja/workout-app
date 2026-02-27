@@ -3,7 +3,6 @@ import { StyleSheet, TextInput, Alert, ScrollView, Pressable, useColorScheme, Vi
 import ThemedText from "../../../components/ThemedText";
 import ThemedView from "../../../components/ThemedView";
 import ThemedButton from "../../../components/ThemedButton";
-import { Calendar } from 'react-native-calendars';
 import { supabase } from '../../../lib/supabase'
 import { router, useFocusEffect } from "expo-router";
 import { Colors } from "../../../constants/Colors"
@@ -25,7 +24,6 @@ const Workout = () => {
   const [loading, setLoading] = useState(false);
   const [allWorkouts, setAllWorkouts] = useState([])
   const [selectedWorkout, setSelectedWorkout] = useState(null)
-  const [newWorkout, setNewWorkout] = useState('')
   const [showExerciseModal, setShowExerciseModal] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState(null);
 
@@ -87,7 +85,7 @@ const Workout = () => {
       const exercisesResponse = await fetch(`${API_URL}/api/get-exercises?user_id=${user_id}&workout_type=${selectedWorkout}`);
       const exercisesData = await exercisesResponse.json();
       const exercisesToAdd = exercisesData.exercises || [];
-            
+
       const response = await fetch(`${API_URL}/api/add-workout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
