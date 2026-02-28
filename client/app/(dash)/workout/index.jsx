@@ -11,6 +11,7 @@ import ThemedCalendar from "../../../components/ThemedCalender";
 import ExerciseForm from "../../../components/ExerciseForm";
 import { Modal } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
+import { getUser } from "../../../lib/getUser";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -33,8 +34,8 @@ const Workout = () => {
   useFocusEffect(
     useCallback(() => {
       const handleDisplay = async () => {
-        let user_id = await getUser()
-        const response = await fetch(`${API_URL}/api/get-workouts?user_id=${user_id}`)
+        const userId = await getUser()
+        const response = await fetch(`${API_URL}/api/get-workouts?user_id=${userId}`)
         const fullData = await response.json();
         setAllWorkouts(fullData.workouts)
         
@@ -48,22 +49,13 @@ const Workout = () => {
     }, [])
   );
 
-  async function getUser() {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      Alert.alert('Error', userError?.message || 'Unable to get user info.')
-      return
-    }
-    return user.id
-  }
-
   const handleShowForm = async () => {
     if (!selectedDate) {
       Alert.alert('Missing Date', 'Please select a date.');
       return;
     }
-    const user_id = await getUser();
-    setUserId(user_id);
+    const userId = await getUser();
+    setUserId(userId);
     setShowExerciseModal(true)
   }
 
@@ -80,9 +72,9 @@ const Workout = () => {
     setLoading(true);
     
     try {
-      const user_id = await getUser();
+      const userId = await getUser();
       
-      const exercisesResponse = await fetch(`${API_URL}/api/get-exercises?user_id=${user_id}&workout_type=${selectedWorkout}`);
+      const exercisesResponse = await fetch(`${API_URL}/api/get-exercises?user_id=${userId}&workout_type=${selectedWorkout}`);
       const exercisesData = await exercisesResponse.json();
       const exercisesToAdd = exercisesData.exercises || [];
 
@@ -90,7 +82,7 @@ const Workout = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: user_id,
+          user_id: userId,
           date: selectedDate,
           workout_type: selectedWorkout,
           exercises: exercisesToAdd

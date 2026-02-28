@@ -35,7 +35,7 @@ const DashboardLayout = () => {
             />
         )
         }}/>
-        <Tabs.Screen name="stats" options={{ title: "Stats", tabBarIcon: ({ focused }) => (
+        <Tabs.Screen name="overall_stats" options={{ title: "Stats", tabBarIcon: ({ focused }) => (
             <Ionicons
             size={24}
             name={focused ? 'stats-chart' : 'stats-chart-outline'}

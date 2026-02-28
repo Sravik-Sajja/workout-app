@@ -4,7 +4,7 @@ import sqlite3
 from methods import workout
 from methods import overall_stats
 from methods import fetch_data
-from methods import calculate_overall_stats as calc
+from methods import calculate_stats as calc
 
 app = Flask(__name__)
 CORS(app)
@@ -23,8 +23,9 @@ def add_workout():
 @app.route("/api/get-workouts", methods = ['GET'])
 def get_workouts():
     try:
-        user_id = request.args.get('user_id') 
-        workout_types = fetch_data.get_workout_types(user_id)
+        user_id = request.args.get('user_id')
+        oldest_date = fetch_data.get_oldest_date(user_id)
+        workout_types = fetch_data.get_workout_types(user_id, oldest_date)
         all_workouts = workout.get_all_workouts(workout_types)
 
         all_dates = fetch_data.get_workout_dates_ascending(user_id)
@@ -55,6 +56,14 @@ def get_overall_stats():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route("/api/recent-stats", methods = ['GET'])
+def get_recent_stats():
+    try:
+        user_id = request.args.get('user_id')
+        return jsonify(calc.calculate_recent_stats(user_id)), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 #to show workout details of past workouts
 @app.route("/api/get-workout-details", methods = ['GET'])
 def get_details():

@@ -21,11 +21,12 @@ def get_workout_dates_ascending(user_id):
     )
     return response.data
 
-def get_workout_types(user_id):
+def get_workout_types(user_id, oldest_date):
     response = (
         supabase.table("Workouts")
         .select("workout_type") 
         .eq("UUID", user_id)
+        .gte("date", oldest_date)
         .execute()
     )
 
