@@ -16,7 +16,9 @@ def add_workout(data):
     for exercise in exercises:
         exercise_name = {
             "workout_id": workout_id,
-            "exercise_type": exercise['name']
+            "exercise_type": exercise['name'],
+            "UUID": user_id,
+            "date": date
         }
         exercise_id = add_to_exercises(exercise_name)
         count_sets = 1
@@ -25,7 +27,9 @@ def add_workout(data):
                 "exercise_id": exercise_id,
                 "weight": set_data['weight'],
                 "set_number": count_sets,
-                "reps": set_data['reps']
+                "reps": set_data['reps'],
+                "UUID": user_id,
+                "date": date
             }
             add_to_sets(set_info)
             count_sets+=1

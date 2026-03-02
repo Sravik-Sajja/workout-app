@@ -125,6 +125,7 @@ const Workout = () => {
         <ThemedView style={styles.section}>
           <ThemedText style={styles.sectionLabel}>SELECT DATE</ThemedText>
           <ThemedCalendar
+            key={colorScheme}
             onDayPress={handleSelectDay}
             markedDates={markedDates}
             selectedDate={selectedDate}
