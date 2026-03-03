@@ -6,6 +6,7 @@ import { Colors } from "../../../constants/Colors"
 import { useColorScheme } from "react-native";
 import Spacer from "../../../components/Spacer";
 import { ThemedDropdown } from "../../../components/ThemedDropdown";
+import { LineChart } from 'react-native-gifted-charts';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -21,6 +22,8 @@ const WeightStats = () => {
     const [hasSelectedExercise, setHasSelectedExercise] = useState(false)
 
     const [oneRepMax, setOneRepMax] = useState(0)
+    const [totalVolume, setTotalVolume] = useState(0)
+    const [weightProgression, setWeightProgression] = useState(null)
 
     useEffect(() => {
         const getAllWorkoutTypes = async () => {
@@ -57,15 +60,50 @@ const WeightStats = () => {
             const data = await response.json()
             setHasSelectedExercise(true)
             setOneRepMax(data.best_one_rep_max)
+            setTotalVolume(data.total_volume)
+            setWeightProgression(data.weight_progression)
         }
         fetchExerciseData()
     }, [selectedExercise])
+
     return(
         <ThemedView style={{ flex: 1, paddingTop: 50 }}>
             <Spacer />
             <ThemedDropdown options={allWorkouts ?? []} selectedValue={selectedWorkout} onValueChange={(val) => { setSelectedWorkout(val); setHasSelectedExercise(false); setSelectedExercise('')}} theme={theme} />
             {hasSelectedWorkout && <ThemedDropdown options={allExercises ?? []} selectedValue={selectedExercise} onValueChange={setSelectedExercise} theme={theme} />}
-            {hasSelectedExercise && <ThemedText>One Rep Max: {oneRepMax}</ThemedText>}
+            {hasSelectedExercise && (
+               <>
+                    <ThemedText>One Rep Max: {oneRepMax}</ThemedText>
+                    <ThemedText>Total Volume: {totalVolume}</ThemedText>
+                </>
+            )}
+            {hasSelectedExercise && weightProgression && (() => {
+                const chartData = Object.entries(weightProgression)
+                    .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
+                    .map(([date, volume]) => ({
+                    value: volume,
+                    label: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                    }));
+
+                return (
+                    <LineChart
+                    data={chartData}
+                    width={320}
+                    height={220}
+                    color={Colors.primary}
+                    thickness={3}
+                    dataPointsColor={Colors.primary}
+                    curved
+                    yAxisColor={theme.text}
+                    xAxisColor={theme.text}
+                    yAxisTextStyle={{ color: theme.text }}
+                    xAxisLabelTextStyle={{ color: theme.text }}
+                    yAxisOffset={Math.floor(Math.min(...chartData.map(d => d.value)) * 0.8)}
+                    initialSpacing={22}
+                    formatYLabel={(value) => Math.round(value).toString()} 
+                    />
+                );
+                })()}
         </ThemedView>
     )
 }

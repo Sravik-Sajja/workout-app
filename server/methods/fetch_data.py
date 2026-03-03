@@ -110,6 +110,7 @@ def _fetch_exercises(workout_id):
         supabase.table("Exercises")
         .select("exercise_id, exercise_type") 
         .eq("workout_id", workout_id)
+        .order("exercise_id", desc=False)
         .execute()
     )
 
