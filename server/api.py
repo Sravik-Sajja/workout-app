@@ -1,10 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
-from methods import workout
-from methods import overall_stats
-from methods import fetch_data
-from methods import calculate_stats as calc
+from methods import workout, overall_stats, fetch_data
+from methods import calculate_stats as calc_stats
+from methods import calculate_weight_stats as calc_weight
 
 app = Flask(__name__)
 CORS(app)
@@ -51,7 +50,7 @@ def get_exercises():
 def get_overall_stats():
     try:
         user_id = request.args.get('user_id')
-        return jsonify(calc.calculate_overall_stats(user_id)), 200
+        return jsonify(calc_stats.calculate_overall_stats(user_id)), 200
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -60,7 +59,7 @@ def get_overall_stats():
 def get_recent_stats():
     try:
         user_id = request.args.get('user_id')
-        return jsonify(calc.calculate_recent_stats(user_id)), 200
+        return jsonify(calc_stats.calculate_recent_stats(user_id)), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
@@ -73,6 +72,17 @@ def get_details():
 
         workout_type, workout_details = fetch_data.get_specific_workout(user_id, date)
         return jsonify({'workout_type': workout_type, 'workout_details': workout_details}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/api/get-exercise-stats", methods = ['GET'])
+def get_exercise_stats():
+    try:
+        user_id = request.args.get('user_id')
+        exercise_type = request.args.get('exercise_type')
+        weight_data = fetch_data.get_weight_data_for_exercise(user_id, exercise_type)
+        
+        return jsonify(calc_weight.calculate_weight_stats(weight_data)), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

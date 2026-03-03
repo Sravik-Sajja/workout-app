@@ -1,108 +1,79 @@
+import { StyleSheet, Alert, ScrollView, View, useColorScheme } from "react-native";
+import ThemedView from "../../../components/ThemedView";
+import { getUser } from "../../../lib/getUser";
+import { Colors } from "../../../constants/Colors";
 import { useState, useCallback } from "react";
-import { StyleSheet, Alert, ScrollView, View, useColorScheme } from 'react-native';
-import ThemedText from "../../components/ThemedText";
-import ThemedView from "../../components/ThemedView";
-import Spacer from "../../components/Spacer";
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect } from "expo-router";
+import ThemedText from "../../../components/ThemedText";
+import Spacer from "../../../components/Spacer";
 import { PieChart } from 'react-native-gifted-charts';
-import { Colors } from "../../constants/Colors";
-import { getUser } from "../../lib/getUser";
-import statsStyles from "../../styles/statsStyles"
+import statsStyles from "../../../styles/statsStyles"
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 const styles = statsStyles;
 
-const OverallStats = () => {
-  const colorScheme = useColorScheme() || 'light'
-  const theme = Colors[colorScheme]
+const RecentStats = () => {
+    const colorScheme = useColorScheme() || 'light'
+    const theme = Colors[colorScheme]
 
-  const [currentStreak, setCurrentStreak] = useState(0)
-  const [longestStreak, setLongestStreak] = useState(0)
-  const [longestStreakStart, setLongestStreakStart] = useState('')
-  const [longestStreakEnd, setLongestStreakEnd] = useState('')
-  const [bestMonthPercentage, setBestMonthPercentage] = useState('')
-  const [bestMonthName, setBestMonthName] = useState('')
-  const [workoutDis, setWorkoutDis] = useState(null)
-  const [overallPercentage, setOverallPercentage] = useState(0)
-  const [loading, setLoading] = useState(true)
+    const [longestStreak, setLongestStreak] = useState(0)
+    const [longestStreakStart, setLongestStreakStart] = useState('')
+    const [longestStreakEnd, setLongestStreakEnd] = useState('')
+    const [workoutDis, setWorkoutDis] = useState(null)
+    const [overallPercentage, setOverallPercentage] = useState(0)
+    const [loading, setLoading] = useState(true)
 
-  // Use theme colors
-  const chartColors = [
-    Colors.primary,
-    '#ff6b6b',
-    '#ffd93d',
-    '#6bcf7f',
-    '#4ecdc4',
-    '#a8dadc'
-  ];
+    const chartColors = [
+        Colors.primary,
+        '#ff6b6b',
+        '#ffd93d',
+        '#6bcf7f',
+        '#4ecdc4',
+        '#a8dadc'
+      ];
 
-  useFocusEffect(
-    useCallback(() => {
-      const getStats = async () => {
-        try {
-          const userId = await getUser();
-          const dataResponse = await fetch(`${API_URL}/api/overall-stats?user_id=${userId}`);
-          const fullData = await dataResponse.json();
-          if (fullData.error) {
-            Alert.alert('API Error', fullData.error);
-            setLoading(false);
-            return;
-          }
+    useFocusEffect(
+        useCallback(() => {
+        const getStats = async () => {
+            try {
+                const userId = await getUser();
+                const dataResponse = await fetch(`${API_URL}/api/recent-stats?user_id=${userId}`);
+                const fullData = await dataResponse.json();
+                if (fullData.error) {
+                    Alert.alert('API Error', fullData.error);
+                    setLoading(false);
+                    return;
+                }
 
-          setCurrentStreak(fullData.current_streak);
-          setLongestStreak(fullData.longest_streak)
-          setLongestStreakStart(fullData.longest_streak_start)
-          setLongestStreakEnd(fullData.longest_streak_end)
-          setOverallPercentage(fullData.overall_percentage);
-          setBestMonthPercentage(fullData.best_month_percentage)
-          setBestMonthName(fullData.best_month_name)
-          setWorkoutDis(fullData.workout_dis);
-          setLoading(false)
-        }
-        catch (error) {
-          Alert.alert('Error', 'Failed to fetch stats');
-          setLoading(false)
-        }
-      };
-      getStats()
-    }, [])
-  );
-
-  const formatChartData = (workoutDis) => {
-    return workoutDis.labels.map((label, index) => ({
-      value: workoutDis.data[index],
-      color: chartColors[index % chartColors.length],
-      text: label
-    }));
-  };
-
-  return (
-    <ThemedView style={styles.container}>
+                setLongestStreak(fullData.longest_streak)
+                setLongestStreakStart(fullData.longest_streak_start)
+                setLongestStreakEnd(fullData.longest_streak_end)
+                setOverallPercentage(fullData.overall_percentage);
+                setWorkoutDis(fullData.workout_dis);
+                setLoading(false)
+            }
+            catch (error) {
+                Alert.alert('Error', 'Failed to fetch stats');
+                setLoading(false)
+            }
+        };
+        getStats()
+        }, [])
+    );
+    const formatChartData = (workoutDis) => {
+        return workoutDis.labels.map((label, index) => ({
+          value: workoutDis.data[index],
+          color: chartColors[index % chartColors.length],
+          text: label
+        }));
+    };
+    return (
+        <ThemedView style={styles.container}>
       <Spacer />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* Stats Cards */}
         <View style={styles.cardsRow}>
-          <View style={[styles.statCard, { backgroundColor: theme.uiBackground }]}>
-            <ThemedText style={styles.statLabel}>CURRENT STREAK</ThemedText>
-            <View style={styles.statValueRow}>
-              <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
-                {currentStreak}
-              </ThemedText>
-              <ThemedText style={styles.statUnit}>{currentStreak === 1 ? "day" : "days"}</ThemedText>
-            </View>
-          </View>
-
-          <View style={[styles.statCard, { backgroundColor: theme.uiBackground }]}>
-            <ThemedText style={styles.statLabel}>PERCENTAGE</ThemedText>
-            <View style={styles.statValueRow}>
-              <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
-                {overallPercentage}
-              </ThemedText>
-              <ThemedText style={styles.statUnit}>%</ThemedText>
-            </View>
-          </View>
-
           <View style={[styles.statCard, { backgroundColor: theme.uiBackground }]}>
             <ThemedText style={styles.statLabel}>LONGEST STREAK</ThemedText>
             <View style={styles.statValueRow}>
@@ -134,14 +105,13 @@ const OverallStats = () => {
           })()}
           </View>
           <View style={[styles.statCard, { backgroundColor: theme.uiBackground }]}>
-            <ThemedText style={styles.statLabel}>BEST MONTH</ThemedText>
+            <ThemedText style={styles.statLabel}>PERCENTAGE</ThemedText>
             <View style={styles.statValueRow}>
               <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
-                {bestMonthPercentage}
+                {overallPercentage}
               </ThemedText>
               <ThemedText style={styles.statUnit}>%</ThemedText>
             </View>
-            <ThemedText style={[styles.dateRange, { color: theme.text }]}>{bestMonthName}</ThemedText>
           </View>
         </View>
 
@@ -197,7 +167,7 @@ const OverallStats = () => {
 
       </ScrollView>
     </ThemedView>
-  );
-}
+    )
 
-export default OverallStats;
+}
+export default RecentStats

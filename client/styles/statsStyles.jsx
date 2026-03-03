@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 const statsStyles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 50,
   },
   scroll: {
     padding: 20,
