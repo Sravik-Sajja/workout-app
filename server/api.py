@@ -16,6 +16,7 @@ def add_workout():
 
         return jsonify({'message': 'Workout added successfully', 'data': result}), 200
     except Exception as e:
+        print(f"ERROR in add_workout: {e}")
         return jsonify({'error': str(e)}), 500
 
 #to show pre-existing workouts
@@ -32,6 +33,7 @@ def get_workouts():
 
         return jsonify({'workouts': all_workouts, 'all_dates': date_list}), 200
     except Exception as e:
+        print(f"ERROR in get_workouts: {e}")
         return jsonify({'error': str(e)}), 500
 
 #to show any pre-existing exercises for a certain workout
@@ -44,6 +46,7 @@ def get_exercises():
 
         return jsonify({'exercises': all_exercises}), 200
     except Exception as e:
+        print(f"ERROR in get_exercises: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route("/api/overall-stats", methods = ['GET'])
@@ -53,6 +56,7 @@ def get_overall_stats():
         return jsonify(calc_stats.calculate_overall_stats(user_id)), 200
     
     except Exception as e:
+        print(f"ERROR in get_overall_stats: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route("/api/recent-stats", methods = ['GET'])
@@ -61,6 +65,7 @@ def get_recent_stats():
         user_id = request.args.get('user_id')
         return jsonify(calc_stats.calculate_recent_stats(user_id)), 200
     except Exception as e:
+        print(f"ERROR in get_recent_stats: {e}")
         return jsonify({'error': str(e)}), 500
     
 #to show workout details of past workouts
@@ -73,6 +78,7 @@ def get_details():
         workout_type, workout_details = fetch_data.get_specific_workout(user_id, date)
         return jsonify({'workout_type': workout_type, 'workout_details': workout_details}), 200
     except Exception as e:
+        print(f"ERROR in get_workout_details: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route("/api/get-exercise-stats", methods = ['GET'])
@@ -84,6 +90,7 @@ def get_exercise_stats():
         
         return jsonify(calc_weight.calculate_weight_stats(weight_data)), 200
     except Exception as e:
+        print(f"ERROR in get_exercise_stats: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":

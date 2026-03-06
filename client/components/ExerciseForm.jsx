@@ -85,7 +85,7 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
         body: JSON.stringify({
           user_id: userId,
           date,
-          workout_type: workoutName,
+          workout_type: workoutName.trim(),
           exercises
         })
       });

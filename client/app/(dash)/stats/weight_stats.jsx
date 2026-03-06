@@ -3,12 +3,13 @@ import ThemedView from "../../../components/ThemedView";
 import { getUser } from "../../../lib/getUser";
 import ThemedText from "../../../components/ThemedText";
 import { Colors } from "../../../constants/Colors"
-import { useColorScheme } from "react-native";
-import Spacer from "../../../components/Spacer";
+import { useColorScheme, View, StyleSheet, ScrollView } from "react-native";
 import { ThemedDropdown } from "../../../components/ThemedDropdown";
-import { LineChart } from 'react-native-gifted-charts';
+import ThemedLineChart from "../../../components/ThemedLineChart";
+import weightStyles from "../../../styles/weightStyles"
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
+const styles = weightStyles;
 
 const WeightStats = () => {
     const colorScheme = useColorScheme() || 'light'
@@ -34,6 +35,7 @@ const WeightStats = () => {
         }
         getAllWorkoutTypes()
     }, [])
+    
     useEffect(() => {
         if (!selectedWorkout) return
         const getAllExercises = async () => {
@@ -67,44 +69,103 @@ const WeightStats = () => {
     }, [selectedExercise])
 
     return(
-        <ThemedView style={{ flex: 1, paddingTop: 50 }}>
-            <Spacer />
-            <ThemedDropdown options={allWorkouts ?? []} selectedValue={selectedWorkout} onValueChange={(val) => { setSelectedWorkout(val); setHasSelectedExercise(false); setSelectedExercise('')}} theme={theme} />
-            {hasSelectedWorkout && <ThemedDropdown options={allExercises ?? []} selectedValue={selectedExercise} onValueChange={setSelectedExercise} theme={theme} />}
-            {hasSelectedExercise && (
-               <>
-                    <ThemedText>One Rep Max: {oneRepMax}</ThemedText>
-                    <ThemedText>Total Volume: {totalVolume}</ThemedText>
-                </>
-            )}
-            {hasSelectedExercise && weightProgression && (() => {
-                const chartData = Object.entries(weightProgression)
-                    .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
-                    .map(([date, volume]) => ({
-                    value: volume,
-                    label: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                    }));
+        <ThemedView style={styles.container}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+                
+                <View style={styles.header}>
+                    <ThemedText style={styles.title}>Exercise Analysis</ThemedText>
+                </View>
 
-                return (
-                    <LineChart
-                    data={chartData}
-                    width={320}
-                    height={220}
-                    color={Colors.primary}
-                    thickness={3}
-                    dataPointsColor={Colors.primary}
-                    curved
-                    yAxisColor={theme.text}
-                    xAxisColor={theme.text}
-                    yAxisTextStyle={{ color: theme.text }}
-                    xAxisLabelTextStyle={{ color: theme.text }}
-                    yAxisOffset={Math.floor(Math.min(...chartData.map(d => d.value)) * 0.8)}
-                    initialSpacing={22}
-                    formatYLabel={(value) => Math.round(value).toString()} 
+                <View style={[styles.selectionCard, { backgroundColor: theme.uiBackground }]}>
+                    <ThemedText style={styles.sectionLabel}>WORKOUT TYPE</ThemedText>
+                    <ThemedDropdown 
+                        options={allWorkouts ?? []} 
+                        selectedValue={selectedWorkout} 
+                        onValueChange={(val) => { 
+                            setSelectedWorkout(val); 
+                            setHasSelectedExercise(false); 
+                            setSelectedExercise('')
+                        }} 
+                        theme={theme} 
                     />
-                );
-                })()}
+                </View>
+
+                {hasSelectedWorkout && (
+                    <View style={[styles.selectionCard, { backgroundColor: theme.uiBackground }]}>
+                        <ThemedText style={styles.sectionLabel}>EXERCISE</ThemedText>
+                        <ThemedDropdown 
+                            options={allExercises ?? []} 
+                            selectedValue={selectedExercise} 
+                            onValueChange={setSelectedExercise} 
+                            theme={theme} 
+                        />
+                    </View>
+                )}
+
+                {hasSelectedExercise && (
+                    <>
+                        <View style={styles.statsRow}>
+                            <View style={[styles.statCard, { backgroundColor: theme.uiBackground }]}>
+                                <ThemedText style={styles.statLabel}>ONE REP MAX</ThemedText>
+                                <View style={styles.statValueRow}>
+                                    <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
+                                        {oneRepMax}
+                                    </ThemedText>
+                                    <ThemedText style={styles.statUnit}>lbs</ThemedText>
+                                </View>
+                            </View>
+
+                            <View style={[styles.statCard, { backgroundColor: theme.uiBackground }]}>
+                                <ThemedText style={styles.statLabel}>TOTAL VOLUME</ThemedText>
+                                <View style={styles.statValueRow}>
+                                    <ThemedText style={[styles.statValue, { color: Colors.primary }]}>
+                                        {totalVolume >= 1000 
+                                            ? (totalVolume / 1000).toFixed(1) 
+                                            : totalVolume
+                                        }
+                                    </ThemedText>
+                                    <ThemedText style={styles.statUnit}>
+                                        {totalVolume >= 1000 ? 'k lbs' : 'lbs'}
+                                    </ThemedText>
+                                </View>
+                            </View>
+                        </View>
+
+                        {weightProgression && (() => {
+                            const chartData = Object.entries(weightProgression)
+                                .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
+                                .map(([date, volume]) => ({
+                                    value: volume,
+                                    label: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                                }));
+
+                            return (
+                                <View style={[styles.chartCard, { backgroundColor: theme.uiBackground }]}>
+                                    <ThemedText style={styles.sectionLabel}>VOLUME PROGRESSION</ThemedText>
+                                    <ThemedText style={[styles.chartSubtitle, { color: theme.text }]}>
+                                        Max set volume over time
+                                    </ThemedText>
+                                    
+                                    <View style={styles.chartContainer}>
+                                        <ThemedLineChart data={chartData} />
+                                    </View>
+                                </View>
+                            );
+                        })()}
+                    </>
+                )}
+
+                {!selectedWorkout && (
+                    <View style={[styles.emptyState, { backgroundColor: theme.uiBackground }]}>
+                        <ThemedText style={[styles.emptyText, { color: theme.text }]}>
+                            Select a workout type to view exercise stats
+                        </ThemedText>
+                    </View>
+                )}
+
+            </ScrollView>
         </ThemedView>
     )
 }
-export default WeightStats
+
+export default WeightStats;
