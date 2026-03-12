@@ -22,7 +22,7 @@ def get_total_volume(data):
     
     return total_volume
 
-def get_weight_progression(data):
+def get_max_set_weight_progression(data):
     result = {}
     for sett in data:
         if sett['date'] in result:
@@ -33,3 +33,24 @@ def get_weight_progression(data):
             max_volume = sett['weight'] * sett['reps']
             result[sett['date']] = max_volume
     return result
+
+def get_average_set_progression(data):
+    result = {}
+    date_to_number = {}
+    for sett in data:
+        set_date = sett['date']
+        if set_date in result:
+            number_of_sets = date_to_number[set_date]
+            total_sets_weight = result[set_date] * number_of_sets
+
+            number_of_sets += 1
+            date_to_number[set_date]+=1
+            
+            total_sets_weight += sett['weight'] * sett['reps']
+            average_sets_weight = total_sets_weight/number_of_sets
+            result[set_date] = average_sets_weight
+        else:
+            result[set_date] = sett['weight'] * sett['reps']
+            date_to_number[set_date] = 1
+    return result
+            

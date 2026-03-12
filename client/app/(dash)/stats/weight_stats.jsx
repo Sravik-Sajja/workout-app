@@ -24,7 +24,8 @@ const WeightStats = () => {
 
     const [oneRepMax, setOneRepMax] = useState(0)
     const [totalVolume, setTotalVolume] = useState(0)
-    const [weightProgression, setWeightProgression] = useState(null)
+    const [maxSetWeightProgression, setMaxSetWeightProgression] = useState(null)
+    const [averageSetWeightProgression, setAverageSetWeightProgression] = useState(null)
 
     useEffect(() => {
         const getAllWorkoutTypes = async () => {
@@ -63,7 +64,8 @@ const WeightStats = () => {
             setHasSelectedExercise(true)
             setOneRepMax(data.best_one_rep_max)
             setTotalVolume(data.total_volume)
-            setWeightProgression(data.weight_progression)
+            setMaxSetWeightProgression(data.max_set_weight_progression)
+            setAverageSetWeightProgression(data.average_set_weight_progression)
         }
         fetchExerciseData()
     }, [selectedExercise])
@@ -131,8 +133,8 @@ const WeightStats = () => {
                             </View>
                         </View>
 
-                        {weightProgression && (() => {
-                            const chartData = Object.entries(weightProgression)
+                        {maxSetWeightProgression && (() => {
+                            const chartData = Object.entries(maxSetWeightProgression)
                                 .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
                                 .map(([date, volume]) => ({
                                     value: volume,
@@ -141,9 +143,30 @@ const WeightStats = () => {
 
                             return (
                                 <View style={[styles.chartCard, { backgroundColor: theme.uiBackground }]}>
-                                    <ThemedText style={styles.sectionLabel}>VOLUME PROGRESSION</ThemedText>
+                                    <ThemedText style={styles.sectionLabel}>MAX SET PROGRESSION</ThemedText>
                                     <ThemedText style={[styles.chartSubtitle, { color: theme.text }]}>
                                         Max set volume over time
+                                    </ThemedText>
+                                    
+                                    <View style={styles.chartContainer}>
+                                        <ThemedLineChart data={chartData} />
+                                    </View>
+                                </View>
+                            );
+                        })()}
+                        {averageSetWeightProgression && (() => {
+                            const chartData = Object.entries(averageSetWeightProgression)
+                                .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
+                                .map(([date, volume]) => ({
+                                    value: volume,
+                                    label: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                                }));
+
+                            return (
+                                <View style={[styles.chartCard, { backgroundColor: theme.uiBackground }]}>
+                                    <ThemedText style={styles.sectionLabel}>AVERAGE SET PROGRESSION</ThemedText>
+                                    <ThemedText style={[styles.chartSubtitle, { color: theme.text }]}>
+                                        Average set volume over time
                                     </ThemedText>
                                     
                                     <View style={styles.chartContainer}>

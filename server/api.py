@@ -37,6 +37,7 @@ def get_workouts():
         return jsonify({'error': str(e)}), 500
 
 #to show any pre-existing exercises for a certain workout
+#need to change eventually because for weight stats should show any exercise they've done as a part of it
 @app.route("/api/get-exercises",  methods = ['GET'])
 def get_exercises():
     try:
