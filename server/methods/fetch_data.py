@@ -23,7 +23,7 @@ def get_workout_dates_ascending(user_id):
     )
     return response.data
 
-#used to show pre-existing workouts and for distribution calculation
+#used to show workouts names in workout add and for distribution calculation
 def get_workout_types(user_id, oldest_date):
     response = (
         supabase.table("Workouts")
@@ -47,7 +47,7 @@ def get_specific_workout(user_id, date):
 
     workout_id = response_of_workouts.data[0]["workout_id"]
     workout_type = response_of_workouts.data[0]["workout_type"]
-    all_exercises = _fetch_exercises(workout_id)
+    all_exercises = _fetch_exercise_weight_data(workout_id)
     return workout_type, all_exercises
     
 #used to get exercises that a user has previously used for a workout
@@ -65,31 +65,64 @@ def get_recent_exercises(user_id, workout_type):
 
     last_workout = response_from_workouts.data[0]['workout_id']
 
-    return _fetch_exercises(last_workout)
+    return _fetch_exercise_weight_data(last_workout)
 
-def get_weight_data_for_exercise(user_id, exercise_type):
-    response_from_exercises = (
+#helper method to fetch individual exercise data and weight data for a singular workout
+def _fetch_exercise_weight_data(workout_id):
+    response = (
         supabase.table("Exercises")
-        .select("exercise_id")
+        .select("exercise_type, Sets(weight, reps)")
+        .eq("workout_id", workout_id)
+        .order("exercise_id", desc=False)
+        .execute()
+    )
+
+    exercises = []
+    for row in response.data:
+        exercises.append({
+            'name': row['exercise_type'],
+            'sets': [{'weight': s['weight'], 'reps': s['reps']} for s in row['Sets']]
+        })
+    return exercises
+
+#gets all exercises ever done for a specific workout
+def get_all_exercises_from_a_workout(user_id, workout_type):
+    response = (
+        supabase.table("Exercises")
+        .select("exercise_type, Workouts!inner(UUID, workout_type)")
+        .eq("Workouts.UUID", user_id)
+        .eq("Workouts.workout_type", workout_type)
+        .execute()
+    )
+    
+    if not response.data:
+        return []
+    
+    seen = set()
+    for row in response.data:
+        seen.add(row["exercise_type"])
+    
+    return list(seen)
+
+#gets weght data for a specific exercise
+def get_weight_data_for_exercise(user_id, exercise_type):
+    response = (
+        supabase.table("Exercises")
+        .select("Sets(weight, reps, set_number, date)")
         .eq("UUID", user_id)
         .eq("exercise_type", exercise_type)
         .order("date", desc=False)
         .execute()
     )
+
     weight_data = []
-    for exercise in response_from_exercises.data:
-        response_from_sets = (
-            supabase.table("Sets")
-            .select("weight, reps, set_number, date")
-            .eq("exercise_id", exercise['exercise_id'])
-            .execute()
-        )
-        for cycle in response_from_sets.data:
+    for row in response.data:
+        for s in row['Sets']:
             weight_data.append({
-                "date": cycle['date'],
-                "set_number": cycle['set_number'],
-                "weight": cycle['weight'],
-                "reps": cycle['reps']
+                "date": s['date'],
+                "set_number": s['set_number'],
+                "weight": s['weight'],
+                "reps": s['reps']
             })
     return weight_data
 
@@ -103,30 +136,3 @@ def get_oldest_date(user_id):
         return None
     oldest_date = data[0]
     return date.fromisoformat(oldest_date['date'])
-    
-
-def _fetch_exercises(workout_id):
-    response_from_exercises = (
-        supabase.table("Exercises")
-        .select("exercise_id, exercise_type") 
-        .eq("workout_id", workout_id)
-        .order("exercise_id", desc=False)
-        .execute()
-    )
-
-    exercises = []
-    for exercise in response_from_exercises.data:
-        response_from_sets = (
-            supabase.table("Sets")
-            .select("weight, reps")
-            .eq("exercise_id", exercise['exercise_id'])
-            .order("set_number", desc=False)
-            .execute()
-        )
-        
-        exercises.append({
-            'name': exercise['exercise_type'],
-            'sets': [{'weight': s['weight'], 'reps': s['reps']} for s in response_from_sets.data]
-        })
-    
-    return exercises

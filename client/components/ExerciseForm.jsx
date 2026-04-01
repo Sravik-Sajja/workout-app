@@ -105,7 +105,7 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
     if (!isNewWorkout && workoutType) {
       const fetchExistingExercises = async () => {
         try {
-          const response = await fetch(`${API_URL}/api/get-exercises?user_id=${userId}&workout_type=${workoutType}`);
+          const response = await fetch(`${API_URL}/api/get-recent-exercises?user_id=${userId}&workout_type=${workoutType}`);
           const data = await response.json();
           
           setExercises(data.exercises || []);

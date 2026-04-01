@@ -74,7 +74,7 @@ const Workout = () => {
     try {
       const userId = await getUser();
       
-      const exercisesResponse = await fetch(`${API_URL}/api/get-exercises?user_id=${userId}&workout_type=${selectedWorkout}`);
+      const exercisesResponse = await fetch(`${API_URL}/api/get-recent-exercises?user_id=${userId}&workout_type=${selectedWorkout}`);
       const exercisesData = await exercisesResponse.json();
       const exercisesToAdd = exercisesData.exercises || [];
 

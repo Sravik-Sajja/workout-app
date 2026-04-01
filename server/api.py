@@ -37,13 +37,25 @@ def get_workouts():
         return jsonify({'error': str(e)}), 500
 
 #to show any pre-existing exercises for a certain workout
-#need to change eventually because for weight stats should show any exercise they've done as a part of it
-@app.route("/api/get-exercises",  methods = ['GET'])
-def get_exercises():
+@app.route("/api/get-recent-exercises",  methods = ['GET'])
+def get_recent_exercises():
     try:
         user_id = request.args.get('user_id')
         workout_type = request.args.get('workout_type')
         all_exercises = fetch_data.get_recent_exercises(user_id, workout_type) 
+
+        return jsonify({'exercises': all_exercises}), 200
+    except Exception as e:
+        print(f"ERROR in get_exercises: {e}")
+        return jsonify({'error': str(e)}), 500
+
+#to show all exercises ever done for a specific workout
+@app.route("/api/get-exercises-for-dropdown",  methods = ['GET'])
+def get_exercises_for_dropdown():
+    try:
+        user_id = request.args.get('user_id')
+        workout_type = request.args.get('workout_type')
+        all_exercises = list(fetch_data.get_all_exercises_from_a_workout(user_id, workout_type))
 
         return jsonify({'exercises': all_exercises}), 200
     except Exception as e:

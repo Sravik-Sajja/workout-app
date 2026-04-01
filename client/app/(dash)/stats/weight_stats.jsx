@@ -41,15 +41,12 @@ const WeightStats = () => {
         if (!selectedWorkout) return
         const getAllExercises = async () => {
             const userId = await getUser()
-            const response = await fetch(`${API_URL}/api/get-exercises?user_id=${userId}&workout_type=${selectedWorkout}`);
+            const response = await fetch(`${API_URL}/api/get-exercises-for-dropdown?user_id=${userId}&workout_type=${encodeURIComponent(selectedWorkout)}`);
             const data = await response.json();
             const exerciseData = data.exercises
             setHasSelectedWorkout(true)
-            if (!exerciseData || exerciseData.length == 0) setAllExercises(["No exercises logged for this workout!"])
-            else{
-                const exerciseNames = exerciseData.map(exercise => exercise.name)
-                setAllExercises(exerciseNames)
-            }
+            if (!exerciseData || exerciseData.length === 0) setAllExercises(["No exercises logged for this workout!"])
+            else setAllExercises(exerciseData)
         }
         getAllExercises()
     }, [selectedWorkout])
