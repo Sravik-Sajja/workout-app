@@ -19,10 +19,10 @@ const DashboardLayout = () => {
             tabBarInactiveTintColor: theme.iconColor
         }}
        >
-        <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ focused }) => (
+        <Tabs.Screen name="tips" options={{ title: "Tips", tabBarIcon: ({ focused }) => (
             <Ionicons
             size={24}
-            name={focused ? 'person' : 'person-outline'}
+            name={focused ? 'chat' : 'chat-outline'}
             color={focused ? Colors.primary : theme.iconColor}
             />
         )

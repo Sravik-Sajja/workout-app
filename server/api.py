@@ -4,6 +4,7 @@ import sqlite3
 from methods import workout, overall_stats, fetch_data
 from methods import calculate_stats as calc_stats
 from methods import calculate_weight_stats as calc_weight
+from methods import tips
 
 app = Flask(__name__)
 CORS(app)
@@ -104,6 +105,17 @@ def get_exercise_stats():
         return jsonify(calc_weight.calculate_weight_stats(weight_data)), 200
     except Exception as e:
         print(f"ERROR in get_exercise_stats: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/api/get-tips", methods = ['GET'])
+def get_tips():
+    try:
+        user_id = request.args.get('user_id')
+        tips = tips.call_for_tips()
+
+        return jsonify({'tips': tips}), 200
+    except Exception as e:
+        print(f"ERROR in get_tips: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":

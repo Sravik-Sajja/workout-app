@@ -124,8 +124,31 @@ def get_weight_data_for_exercise(user_id, exercise_type):
                 "weight": s['weight'],
                 "reps": s['reps']
             })
+
     return weight_data
 
+#for ai tips
+def get_all_weight_data(user_id):
+    response = (
+        supabase.table("Exercises")
+        .select("exercise_type, Sets(weight, reps, set_number, date)")
+        .eq("UUID", user_id)
+        .order("date", desc=False)
+        .execute()
+    )
+
+    weight_data = []
+    for row in response.data:
+        for s in row["Sets"]:
+            weight_data.append({
+                "exercise_type": row["exercise_type"],
+                "date": s["date"],
+                "set_number": s["set_number"],
+                "weight": s["weight"],
+                "reps": s["reps"]
+            })
+
+    return weight_data
 
 def get_current_date():
     return date.today()
