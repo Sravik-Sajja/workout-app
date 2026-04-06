@@ -22,7 +22,7 @@ const DashboardLayout = () => {
         <Tabs.Screen name="tips" options={{ title: "Tips", tabBarIcon: ({ focused }) => (
             <Ionicons
             size={24}
-            name={focused ? 'chat' : 'chat-outline'}
+            name={focused ? 'bulb' : 'bulb-outline'}
             color={focused ? Colors.primary : theme.iconColor}
             />
         )

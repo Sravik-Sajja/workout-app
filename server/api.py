@@ -111,9 +111,10 @@ def get_exercise_stats():
 def get_tips():
     try:
         user_id = request.args.get('user_id')
-        tips = tips.call_for_tips()
+        data = fetch_data.get_all_weight_data(user_id)
+        all_tips = tips.call_for_tips(data)
 
-        return jsonify({'tips': tips}), 200
+        return jsonify({'tips': all_tips}), 200
     except Exception as e:
         print(f"ERROR in get_tips: {e}")
         return jsonify({'error': str(e)}), 500

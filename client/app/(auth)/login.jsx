@@ -30,7 +30,7 @@ const Login = () => {
         }
        else {
             Alert.alert('Success', 'Logged in!')
-            router.push('/profile')
+            router.push('/workout')
        }
     }
 

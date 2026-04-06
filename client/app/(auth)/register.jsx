@@ -32,7 +32,7 @@ const Register = () => {
         }
         else {
             Alert.alert('Success', 'Registered!')
-            router.push('/profile')
+            router.push('/workout')
         }
     }
     return (

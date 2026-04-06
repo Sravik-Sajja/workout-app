@@ -4,10 +4,9 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lib.supabase import supabase
-import fetch_data
+from methods import fetch_data
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from collections import defaultdict
 
 load_dotenv()
 
@@ -18,21 +17,27 @@ def call_for_tips(workout_data):
     filtered_data = filter_data(workout_data)
     filtered_data = compress_workout_data(filtered_data)
     prompt = f"""
-    Give exactly 3 actionable workout tips based on the data.
-
-    Rules:
-    - Each tip MUST follow this format:
-    Problem: <1 sentence> (max 20 words)
-    Fix: <1 sentence> (max 20 words)
-    Why: <1 sentence> (can be around 50 words but keep to only needed explanation)
-    - Focus on progression, overload, and plateaus
-    - You may compare muscle groups if supported by data
-    - No extra commentary or additional tips
-
-    Data:
-    {filtered_data}
-    """
     
+        You are a fitness coach analyzing workout data. 
+        Return exactly 3 tips and nothing else.
+
+        Example:
+        Progressive overload|Bench flat for 3 weeks|Try dropping to 3x8 instead of 5x5.|Your muscles adapt to the same stimulus over time. Changing rep ranges recruits different muscle fibres and can restart growth without adding more weight.
+
+        Rules:
+        - CATEGORY: one of Recovery, Progressive overload, Consistency, Muscle imbalance(compare opposing muscle groups (e.g. hamstrings vs quads, biceps vs triceps, chest vs back)), Habit insight
+        - TITLE: the problem, max 6 words
+        - BODY: the fix, max 20 words
+        - WHY: why it matters, max 50 words
+        - Each tip must be supported by the data
+        - No duplicate categories
+        - No extra text
+
+        Data format: ExerciseName|Date:weightxreps;weightxreps|Date:weightxreps;weightxreps|...
+        Data:
+        {filtered_data}
+        """
+
     token_count = client.messages.count_tokens(
         model="claude-haiku-4-5-20251001",
         messages=[{"role": "user", "content": prompt}]
@@ -40,16 +45,19 @@ def call_for_tips(workout_data):
     
     print(f"Input tokens: {token_count.input_tokens}")
     print(f"Estimated cost: ${token_count.input_tokens * 0.00000025:.6f}")
+    #current output costing ~150 tokens
     #print(filtered_data)
 
     '''
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=1024,
+        max_tokens=300,
         messages=[{"role": "user", "content": prompt}]
     )
-    return response.content[0].text
+    formatted_tips = parse_tips_output(response.content[0].text)
+    return formatted_tips
     '''
+
     return None
 
 def filter_data(workout_data):
@@ -89,4 +97,21 @@ def compress_workout_data(workout_data):
 
     return "\n".join(lines)
 
-print(call_for_tips(fetch_data.get_all_weight_data(my_id)))
+def parse_tips_output(output):
+    tips = []
+    for line in output.strip().split('\n'):
+        if not line.strip():
+            continue
+        parts = line.split('|')
+        if len(parts) != 4:
+            continue
+        tips.append({
+            "category": parts[0].strip(),
+            "title": parts[1].strip(),
+            "body": parts[2].strip(),
+            "reason": parts[3].strip()
+        })
+    return tips
+
+if __name__ == '__main__':
+    print(call_for_tips(fetch_data.get_all_weight_data(my_id)))
