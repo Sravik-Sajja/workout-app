@@ -150,6 +150,33 @@ def get_all_weight_data(user_id):
 
     return weight_data
 
+def select_weight_data_by_query(user_id, workout_type=None, start_date=None, end_date=None, exercise_type=None):
+    query = (
+        supabase.table("Workouts")
+        .select("date, workout_type, Exercises(exercise_type, Sets(weight, reps, set_number))")
+        .eq("UUID", user_id)
+        .order("date", desc=False)
+    )
+
+    if start_date:
+        query = query.gte("date", start_date)
+    if end_date:
+        query = query.lte("date", end_date)
+    if workout_type:
+        query = query.eq("workout_type", workout_type)
+
+    result = query.execute().data
+
+    # filter exercise_type
+    if exercise_type:
+        for workout in result:
+            workout["Exercises"] = [
+                e for e in workout.get("Exercises", [])
+                if e["exercise_type"] == exercise_type
+            ]
+
+    return result
+
 def get_current_date():
     return date.today()
 

@@ -30,7 +30,7 @@ def call_for_tips(workout_data):
         - BODY: the fix, max 20 words
         - WHY: why it matters, max 50 words
         - Each tip must be supported by the data
-        - No duplicate categories
+        - No duplicate categories(not just label of category but tips should focus on different aspects)
         - No extra text
 
         Data format: ExerciseName|Date:weightxreps;weightxreps|Date:weightxreps;weightxreps|...
@@ -46,9 +46,8 @@ def call_for_tips(workout_data):
     print(f"Input tokens: {token_count.input_tokens}")
     print(f"Estimated cost: ${token_count.input_tokens * 0.00000025:.6f}")
     #current output costing ~150 tokens
-    #print(filtered_data)
+    #return None
 
-    '''
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=300,
@@ -56,9 +55,6 @@ def call_for_tips(workout_data):
     )
     formatted_tips = parse_tips_output(response.content[0].text)
     return formatted_tips
-    '''
-
-    return None
 
 def filter_data(workout_data):
     cutoff = datetime.now().date() - timedelta(days=60)
