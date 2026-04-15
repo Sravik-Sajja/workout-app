@@ -132,10 +132,10 @@ const WeightStats = () => {
 
                         {maxSetWeightProgression && (() => {
                             const chartData = Object.entries(maxSetWeightProgression)
-                                .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
+                                .sort(([dateA], [dateB]) => new Date(dateA + 'T00:00:00') - new Date(dateB + 'T00:00:00'))
                                 .map(([date, volume]) => ({
                                     value: volume,
-                                    label: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                                    label: new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                 }));
 
                             return (
@@ -153,10 +153,10 @@ const WeightStats = () => {
                         })()}
                         {averageSetWeightProgression && (() => {
                             const chartData = Object.entries(averageSetWeightProgression)
-                                .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
+                                .sort(([dateA], [dateB]) => new Date(dateA + 'T00:00:00') - new Date(dateB + 'T00:00:00'))
                                 .map(([date, volume]) => ({
                                     value: volume,
-                                    label: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                                    label: new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                 }));
 
                             return (
