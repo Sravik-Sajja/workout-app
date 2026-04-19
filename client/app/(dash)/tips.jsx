@@ -1,4 +1,4 @@
-import { ScrollView, View, Pressable, Alert, Modal, TouchableOpacity } from "react-native";
+import { ScrollView, View, Pressable, Alert, Modal, TouchableOpacity, ActivityIndicator } from "react-native";
 import ThemedText from "../../components/ThemedText";
 import ThemedView from "../../components/ThemedView";
 import { Colors } from "../../constants/Colors";
@@ -75,7 +75,7 @@ const TipModal = ({ tip, visible, onClose, theme, colorScheme }) => {
           {tip.reason ? (
             <View style={[ms.reasonSection, { backgroundColor: reasonBg, borderWidth: 0.5, borderColor: reasonBorder }]}>
               <ThemedText style={[ms.reasonLabel, { color: reasonLabelColor }]}>
-                Why this matters
+                Why
               </ThemedText>
               <ThemedText style={[ms.reasonText, { color: theme.text }]}>
                 {tip.reason}
@@ -176,9 +176,16 @@ const Tips = () => {
           </ThemedText>
         </View>
 
-        {allTips.slice(0, 4).map((tip, i) => (
-          <TipCard key={i} tip={tip} theme={theme} onPress={handleTipPress} />
-        ))}
+        {loading ? (
+          <View style={{ alignItems: 'center', marginTop: 60, gap: 12 }}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <ThemedText style={{ opacity: 0.5, fontSize: 14 }}>Analyzing your training data...</ThemedText>
+          </View>
+        ) : (
+          allTips.slice(0, 4).map((tip, i) => (
+            <TipCard key={i} tip={tip} theme={theme} onPress={handleTipPress} />
+          ))
+        )}
       </ScrollView>
 
       <TipModal

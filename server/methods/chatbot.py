@@ -2,7 +2,6 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import json
 from anthropic import Anthropic
 from lib.supabase import supabase
 from methods import fetch_data
@@ -57,47 +56,11 @@ def call_chatbot(user_id, user_prompt, oldest_date):
     for name in all_workouts:
         exercises = fetch_data.get_all_exercises_from_a_workout(user_id, name)
         all_exercises[name] = list(exercises)
-
-    tools = [
-        {
-            "name": "fetch_workout_data",
-            "description": "Fetches workout data for a user based on optional filters like workout type, exercise type, and date range.",
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "workout_type": {
-                        "type": "string",
-                        "description": "Type of workout, e.g. 'legs' or 'upper'",
-                        "enum": all_workouts
-                    },
-                    "exercise_type": {
-                        "type": "string",
-                        "description": f"Available exercises by workout type: {all_exercises}. Use workout_type and exercise_type filters accordingly."
-                    },
-                    "start_date": {
-                        "type": "string",
-                        "description": "Start date for filtering in YYYY-MM-DD format"
-                    },
-                    "end_date": {
-                        "type": "string",
-                        "description": "End date for filtering in YYYY-MM-DD format"
-                    }
-                },
-                "required": []
-            }
-        }
-    ]
-    system_prompt = """You are a fitness coach helping a user analyze their workout data.
-
-                    When the user asks about their workouts, ALWAYS call the fetch_workout_data tool first to retrieve 
-                    their actual data before responding. Extract these parameters from the query only if mentioned:
-                    - workout_type: e.g.('legs' or 'upper')
-                    - exercise_type: specific exercise name (e.g. 'Bench Press', 'Squats')
-                    - start_date: in YYYY-MM-DD format
-                    - end_date: in YYYY-MM-DD format
-
-                    If no date range is mentioned, fetch all available data. Analyze the returned data and give 
-                    at most 2 helpful, specific insights based on their data and prompt"""
+    
+    current_date = fetch_data.get_current_date()
+    
+    tools = _fetch_tools(all_workouts, all_exercises)
+    system_prompt = _fetch_prompt(current_date)
 
     messages = [{"role": "user", "content": user_prompt}]
 
@@ -111,6 +74,73 @@ def call_chatbot(user_id, user_prompt, oldest_date):
     #return None
 
     # Agentic loop
+    final_message = _agentic_loop(system_prompt, tools, messages, user_id)
+    return final_message
+
+def process_message(user_id, user_prompt):
+    oldest_date = fetch_data.get_oldest_date(user_id)
+    response = call_chatbot(user_id, user_prompt, oldest_date)
+
+    supabase.table("Messages").insert({
+        'user_id': user_id,
+        'content': user_prompt,
+        'response': response,
+    }).execute()
+
+    return response
+
+def _fetch_tools(all_workouts, all_exercises):
+    return  [
+            {
+                "name": "fetch_workout_data",
+                "description": "Fetches workout data for a user based on optional filters like workout type, exercise type, and date range.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "workout_type": {
+                            "type": "string",
+                            "description": "Type of workout, e.g. 'legs' or 'upper'",
+                            "enum": all_workouts
+                        },
+                        "exercise_type": {
+                            "type": "string",
+                            "description": f"Available exercises by workout type: {all_exercises}. Use workout_type and exercise_type filters accordingly."
+                        },
+                        "start_date": {
+                            "type": "string",
+                            "description": "Start date for filtering in YYYY-MM-DD format"
+                        },
+                        "end_date": {
+                            "type": "string",
+                            "description": "End date for filtering in YYYY-MM-DD format"
+                        }
+                    },
+                    "required": []
+                }
+            }
+        ]
+
+def _fetch_prompt(current_date):
+    return f"""You are a fitness coach helping a user analyze their workout data.
+
+                When the user asks about their workouts, ALWAYS call the fetch_workout_data tool first to retrieve 
+                their actual data before responding. Extract these parameters from the query only if mentioned:
+                    - workout_type: e.g.('legs' or 'upper')
+                    - exercise_type: specific exercise name (e.g. 'Bench Press', 'Squats')
+                    - start_date: in YYYY-MM-DD format
+                    - end_date: in YYYY-MM-DD format
+
+                If no date range is mentioned, fetch all available data. 
+                If only month and date are given, assume the current date is {current_date}.
+
+                If their prompt requires you to analyze the weight data do it, otherwise just answer their question
+                Give at most 2 insightful, specific insights focusing on their prompt and nothing else
+                Rules:
+                    You are having a direct conversation no lists, no astericks, make it flow like a regular conversation
+                    Your response must be less than 70 words
+            """
+
+def _agentic_loop(system_prompt, tools, messages, user_id):
     while True:
         print(f"\n[API Call] Sending {len(messages)} messages...")
         response = client.messages.create(
@@ -145,23 +175,12 @@ def call_chatbot(user_id, user_prompt, oldest_date):
                     tool_results.append({
                         "type": "tool_result",
                         "tool_use_id": block.id,
-                        "content": json.dumps(result),
+                        "content": result
                     })
 
             # Feed tool results back to claude
             messages.append({"role": "user", "content": tool_results})
 
-def process_message(user_id, user_prompt):
-    oldest_date = fetch_data.get_oldest_date(user_id)
-    response = call_chatbot(user_id, user_prompt, oldest_date)
-
-    supabase.table("Messages").insert({
-        'user_id': user_id,
-        'content': user_prompt,
-        'response': response,
-    }).execute()
-
-    return response
 
 if __name__ == '__main__':
-    print(call_chatbot(my_id, "how to improve my bench press", "2025-09-01"))
+    print(call_chatbot(my_id, "how many leg days have i done in the last 45 days", "2025-09-01"))

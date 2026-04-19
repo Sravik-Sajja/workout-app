@@ -27,6 +27,14 @@ const DashboardLayout = () => {
             />
         )
         }}/>
+        <Tabs.Screen name="chatbot" options={{ title: "Coach", tabBarIcon: ({ focused }) => (
+            <Ionicons
+            size={24}
+            name={focused ? 'body' : 'body-outline'}
+            color={focused ? Colors.primary : theme.iconColor}
+            />
+        )
+        }}/>
         <Tabs.Screen name="workout" options={{ title: "Workout", tabBarIcon: ({ focused }) => (
             <Ionicons
             size={24}

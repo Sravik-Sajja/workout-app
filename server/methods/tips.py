@@ -25,13 +25,16 @@ def call_for_tips(workout_data):
         Progressive overload|Bench flat for 3 weeks|Try dropping to 3x8 instead of 5x5.|Your muscles adapt to the same stimulus over time. Changing rep ranges recruits different muscle fibres and can restart growth without adding more weight.
 
         Rules:
-        - CATEGORY: one of Recovery, Progressive overload, Consistency, Muscle imbalance(compare opposing muscle groups (e.g. hamstrings vs quads, biceps vs triceps, chest vs back)), Habit insight
+        - CATEGORY: one of Recovery, Progressive overload, Consistency, Muscle imbalance(compare opposing muscle groups), Habit insight
         - TITLE: the problem, max 6 words
-        - BODY: the fix, max 20 words
-        - WHY: why it matters, max 50 words
+        - BODY: the fix, max 30 words
+        - WHERE/WHY: when/where in the data you noticed the problem + why it matters, max 60 words(focus on why it matters)
         - Each tip must be supported by the data
-        - No duplicate categories(not just label of category but tips should focus on different aspects)
+        - No duplicate categories(not just label of category but tips, themselves, should focus on different aspects)
         - No extra text
+
+        Make sure tips actually fall under their respective categories
+        Focus more on recent workout data but do not overreact to a couple of workouts
 
         Data format: ExerciseName|Date:weightxreps;weightxreps|Date:weightxreps;weightxreps|...
         Data:
@@ -44,7 +47,6 @@ def call_for_tips(workout_data):
     )
     
     print(f"Input tokens: {token_count.input_tokens}")
-    print(f"Estimated cost: ${token_count.input_tokens * 0.00000025:.6f}")
     #current output costing ~150 tokens
     #return None
 

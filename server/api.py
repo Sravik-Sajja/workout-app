@@ -5,6 +5,7 @@ from methods import workout, overall_stats, fetch_data
 from methods import calculate_stats as calc_stats
 from methods import calculate_weight_stats as calc_weight
 from methods import tips
+from methods import chatbot
 
 app = Flask(__name__)
 CORS(app)
@@ -117,6 +118,19 @@ def get_tips():
         return jsonify({'tips': all_tips}), 200
     except Exception as e:
         print(f"ERROR in get_tips: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/api/get-chatbot-response", methods = ['GET'])
+def get_chat_response():
+    try:
+        user_id = request.args.get('user_id')
+        user_prompt = request.args.get('user_prompt')
+
+        response = chatbot.process_message(user_id, user_prompt)
+
+        return jsonify({'response': response}), 200
+    except Exception as e:
+        print(f"ERROR in get_chat_response: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
