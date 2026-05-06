@@ -14,10 +14,6 @@ const Home = () => {
   return (
     <ThemedView style={styles.container}>
       <ThemedText style={styles.title} title={true}>Workout Tracker</ThemedText>
-
-      <Link href="/tips" style = {styles.link}>
-        <ThemedText>Tips Page</ThemedText>
-      </Link>
       <Spacer />
 
       <ThemedButton onPress={() => router.push('/login')}>

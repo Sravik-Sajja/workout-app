@@ -45,6 +45,11 @@ class TestWeightStats(unittest.TestCase):
          expected_result = {'2026-02-25': 940}
          self.assertEqual(weight_stats.get_max_set_weight_progression(data), expected_result)
     
+    def test_max_set_weight_progression_with_no_weight(self):
+         data = [{'date': '2026-02-25', 'set_number': 1, 'weight': 0, 'reps': 9}]
+         expected_result = {'2026-02-25': 9}
+         self.assertEqual(weight_stats.get_max_set_weight_progression(data), expected_result)
+    
     #testing average set progression
     def test_average_set_progression_with_one_set_a_day(self):
         data = [{'date': '2026-02-25', 'set_number': 1, 'weight': 90, 'reps': 9}, {'date': '2026-02-29', 'set_number': 1, 'weight': 100,'reps': 9}]
@@ -61,6 +66,11 @@ class TestWeightStats(unittest.TestCase):
 
         expected_result = {'2026-02-25': 1000}
         self.assertEqual(weight_stats.get_average_set_progression(data), expected_result)
+    
+    def test_average_set_weight_progression_with_no_weight(self):
+         data = [{'date': '2026-02-25', 'set_number': 1, 'weight': 0, 'reps': 9}]
+         expected_result = {'2026-02-25': 9}
+         self.assertEqual(weight_stats.get_max_set_weight_progression(data), expected_result)
 
 if __name__ == '__main__':
     unittest.main()
