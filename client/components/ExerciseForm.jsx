@@ -8,6 +8,7 @@ import ThemedView from './ThemedView';
 import ThemedButton from './ThemedButton';
 import { Colors } from '../constants/Colors';
 import Spacer from './Spacer';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -171,6 +172,7 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
   const [sets, setSets] = useState([{ weight: '', reps: '' }]);
   const [editingExerciseIndex, setEditingExerciseIndex] = useState(null);
   const [isDragging, setIsDragging] = useState(false); // passed to ScrollView
+  const [isSaving, setIsSaving] = useState(false);
 
   const addSet = () => {
     setSets([...sets, { weight: '', reps: '' }]);
@@ -225,6 +227,7 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
       Alert.alert('Error', 'Add a workout name');
       return
     }
+    setIsSaving(true);
     try {
       const response = await fetch(`${API_URL}/api/add-workout`, {
         method: 'POST',
@@ -245,6 +248,9 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
     } catch {
       Alert.alert('Error', 'Could not connect to server');
     }
+    finally {
+      setIsSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -263,8 +269,14 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
 
   return (
     <ThemedView style={styles.container}>
-      {/* scrollEnabled=false while dragging so ScrollView doesn't steal the gesture */}
-      <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={!isDragging}>
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={!isDragging}
+        extraScrollHeight={80}
+        keyboardShouldPersistTaps="handled"
+        enableResetScrollToCoords={false}
+      >
         <Spacer />
 
         <View style={styles.header}>
@@ -349,15 +361,26 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
             <ThemedText style={styles.buttonText}>Save Exercise</ThemedText>
           </ThemedButton>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <View style={styles.bottomActions}>
-        <Pressable onPress={onClose} style={styles.cancelButton}>
-          <ThemedText style={{ color: theme.text }}>Cancel</ThemedText>
-        </Pressable>
-        <ThemedButton onPress={saveWorkout} style={styles.saveButton}>
-          <ThemedText style={styles.buttonText}>Save Workout</ThemedText>
-        </ThemedButton>
+      <ThemedButton onPress={onClose} style={styles.cancelButton}>
+        <ThemedText style={styles.buttonText}>
+          Cancel
+        </ThemedText>
+      </ThemedButton>
+      <ThemedButton
+        onPress={saveWorkout}
+        style={[
+          styles.saveButton,
+          isSaving && { opacity: 0.6 }
+        ]}
+        disabled={isSaving}
+      >
+        <ThemedText style={styles.buttonText}>
+          {isSaving ? 'Saving...' : 'Save Workout'}
+        </ThemedText>
+      </ThemedButton>
       </View>
     </ThemedView>
   );
@@ -489,12 +512,11 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: Colors.primary + '40',
   },
   saveButton: {
-    flex: 2,
+    flex: 1,
     padding: 16,
+    alignItems: 'center',
     borderRadius: 12,
   },
   buttonText: {
