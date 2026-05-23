@@ -1,5 +1,6 @@
 import { LineChart } from 'react-native-gifted-charts';
 import { useColorScheme, ScrollView } from 'react-native';
+import { useRef } from 'react';
 import { Colors } from '../constants/Colors';
 
 const SPACING = 50;
@@ -8,6 +9,7 @@ const MIN_WIDTH = 260;
 const ThemedLineChart = ({ data, ...props }) => {
   const colorScheme = useColorScheme() || 'light';
   const theme = Colors[colorScheme];
+  const scrollRef = useRef(null);
 
   const minValue = Math.min(...data.map(d => d.value));
   const yAxisOffset = Math.floor(minValue * 0.9);
@@ -17,11 +19,14 @@ const ThemedLineChart = ({ data, ...props }) => {
 
   return (
     <ScrollView
+      ref={scrollRef}
       horizontal
       scrollEnabled={isScrollable}
       showsHorizontalScrollIndicator={isScrollable}
+      onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
     >
       <LineChart
+        disableScroll
         data={data}
         width={chartWidth}
         height={240}
@@ -45,6 +50,7 @@ const ThemedLineChart = ({ data, ...props }) => {
         formatYLabel={(value) => Math.round(value).toString()}
         noOfSections={5}
         spacing={SPACING}
+        endSpacing={30}
         {...props}
       />
     </ScrollView>

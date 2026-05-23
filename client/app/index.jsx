@@ -1,15 +1,35 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import ThemedView from '../components/ThemedView';
 import ThemedText from '../components/ThemedText';
 import ThemedButton from '../components/ThemedButton';
 import Spacer from '../components/Spacer';
+import { supabase } from '../lib/supabase';
+import { Colors } from '../constants/Colors';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
 
 const Home = () => {
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) router.replace('/workout');
+      else setChecking(false);
+    };
+    checkSession();
+  }, []);
+
+  if (checking) {
+    return (
+      <ThemedView style={styles.container}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
