@@ -62,7 +62,7 @@ const Chatbot = () => {
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={90}
+                keyboardVerticalOffset={5}
             >
                 <ScrollView
                     ref={scrollRef}

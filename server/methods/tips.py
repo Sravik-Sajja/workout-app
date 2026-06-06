@@ -18,11 +18,16 @@ def call_for_tips(workout_data):
     filtered_data = compress_workout_data(filtered_data)
     prompt = f"""
     
-        You are a fitness coach analyzing workout data. 
+        You are a fitness coach. Before writing tips, silently analyze:
+        - Stalled exercises (same weight/reps 3+ sessions)
+        - Rep increases without weight increases (readiness to progress)
+        - Missing sessions or dropped sets (consistency/fatigue)
+        - Opposing muscle group imbalances (e.g. push vs pull volume)
+        - Recent trend vs. earlier trend
         Return exactly 3 tips and nothing else.
 
         Example:
-        Progressive overload|Bench flat for 3 weeks|Try dropping to 3x8 instead of 5x5.|Your muscles adapt to the same stimulus over time. Changing rep ranges recruits different muscle fibres and can restart growth without adding more weight.
+        CATEGORY|TITLE|BODY|WHERE/WHY
 
         Rules:
         - CATEGORY: one of Recovery, Progressive overload, Consistency, Muscle imbalance(compare opposing muscle groups), Habit insight
@@ -31,10 +36,9 @@ def call_for_tips(workout_data):
         - WHERE/WHY: when/where in the data you noticed the problem + why it matters, max 60 words(focus on why it matters)
         - Each tip must be supported by the data
         - No duplicate categories(not just label of category but tips, themselves, should focus on different aspects)
-        - No extra text
 
-        Make sure tips actually fall under their respective categories
-        Focus more on recent workout data but do not overreact to a couple of workouts
+        Make sure tips actually fall under their respective categories and that they do not condescend each other
+        Focus more on last 40 days workout data but do not overreact to a couple of workouts
 
         Data format: ExerciseName|Date:weightxreps;weightxreps|Date:weightxreps;weightxreps|...
         Data:

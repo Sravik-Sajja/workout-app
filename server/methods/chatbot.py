@@ -60,7 +60,7 @@ def call_chatbot(user_id, user_prompt, oldest_date):
     current_date = fetch_data.get_current_date()
     
     tools = _fetch_tools(all_workouts, all_exercises)
-    system_prompt = _fetch_prompt(current_date)
+    system_prompt = _fetch_system_prompt(current_date)
 
     messages = [{"role": "user", "content": user_prompt}]
 
@@ -120,8 +120,10 @@ def _fetch_tools(all_workouts, all_exercises):
             }
         ]
 
-def _fetch_prompt(current_date):
-    return f"""You are a fitness coach helping a user analyze their workout data.
+def _fetch_system_prompt(current_date):
+    return f""" You are a fitness coach helping a user analyze their workout data.
+                You are having a direct conversation no lists, no astericks, make it flow like a regular conversation
+                Your response must be less than 70 words
 
                 When the question requires the user's personal workout history,
                 call fetch_workout_data before answering.
@@ -137,9 +139,6 @@ def _fetch_prompt(current_date):
                 If only month and date are given, assume the current date is {current_date}.
 
                 Give at most 2 insightful, specific insights focusing on their prompt and nothing else
-                Rules:
-                    You are having a direct conversation no lists, no astericks, make it flow like a regular conversation
-                    Your response must be less than 70 words
             """
 
 def _agentic_loop(system_prompt, tools, messages, user_id):
