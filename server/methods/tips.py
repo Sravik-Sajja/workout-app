@@ -26,7 +26,7 @@ def call_for_tips(workout_data):
         - Recent trend vs. earlier trend
         Return exactly 3 tips and nothing else.
 
-        Example:
+        Output format:
         CATEGORY|TITLE|BODY|WHERE/WHY
 
         Rules:

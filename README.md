@@ -77,7 +77,7 @@ Create the following tables in your Supabase project:
 | Column | Type | Notes |
 |---|---|---|
 | `id` | uuid | Primary key |
-| `uuid` | uuid | Foreign key → auth.users |
+| `user_id` | uuid | Foreign key → auth.users |
 | `content` | text | User's message |
 | `response` | text | AI response |
 | `created_at` | timestamptz | Auto-generated |

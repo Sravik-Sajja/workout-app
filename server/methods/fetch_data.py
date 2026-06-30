@@ -177,6 +177,17 @@ def select_weight_data_by_query(user_id, workout_type=None, start_date=None, end
 
     return result
 
+def get_recent_messages(user_id, limit=2):
+    response = (
+        supabase.table("Messages")
+        .select("content, response, created_at")
+        .eq("user_id", user_id)
+        .order("created_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    return list(reversed(response.data))
+
 def get_current_date():
     return date.today()
 

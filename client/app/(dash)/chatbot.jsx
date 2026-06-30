@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { View, TextInput, ScrollView, Pressable, ActivityIndicator, useColorScheme, KeyboardAvoidingView, Platform } from "react-native";
 import ThemedView from "../../components/ThemedView";
 import ThemedText from "../../components/ThemedText";
@@ -23,6 +23,26 @@ const Chatbot = () => {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef(null);
+
+    useEffect(() => {
+        const loadHistory = async () => {
+            try {
+                const userId = await getUser();
+                const response = await fetch(`${API_URL}/api/get-chat-history?user_id=${userId}`);
+                const data = await response.json();
+                if (data.history && data.history.length > 0) {
+                    const historyMessages = data.history.flatMap((h) => [
+                        { role: "user", text: h.content },
+                        { role: "assistant", text: h.response },
+                    ]);
+                    setMessages((prev) => [...historyMessages, ...prev]);
+                }
+            } catch (error) {
+                console.error("Failed to load chat history:", error);
+            }
+        };
+        loadHistory();
+    }, []);
 
     const sendMessage = async () => {
         const trimmed = input.trim();

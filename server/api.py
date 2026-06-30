@@ -133,5 +133,15 @@ def get_chat_response():
         print(f"ERROR in get_chat_response: {e}")
         return jsonify({'error': str(e)}), 500
 
+@app.route("/api/get-chat-history", methods=['GET'])
+def get_chat_history():
+    try:
+        user_id = request.args.get('user_id')
+        history = fetch_data.get_recent_messages(user_id, limit=2)
+        return jsonify({'history': history}), 200
+    except Exception as e:
+        print(f"ERROR in get_chat_history: {e}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)

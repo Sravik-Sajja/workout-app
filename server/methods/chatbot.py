@@ -50,36 +50,31 @@ def compress_workout_data(data):
 
     return "\n".join(lines)
 
-def call_chatbot(user_id, user_prompt, oldest_date):
+def call_chatbot(user_id, user_prompt, oldest_date, history=None):
     all_workouts = workout.get_all_workouts(fetch_data.get_workout_types(user_id, oldest_date))
     all_exercises = {}
     for name in all_workouts:
         exercises = fetch_data.get_all_exercises_from_a_workout(user_id, name)
         all_exercises[name] = list(exercises)
-    
+
     current_date = fetch_data.get_current_date()
-    
     tools = _fetch_tools(all_workouts, all_exercises)
     system_prompt = _fetch_system_prompt(current_date)
 
-    messages = [{"role": "user", "content": user_prompt}]
+    messages = []
+    if history:
+        for h in history:
+            messages.append({"role": "user", "content": h["content"]})
+            messages.append({"role": "assistant", "content": h["response"]})
+    messages.append({"role": "user", "content": user_prompt})
 
-    response = client.messages.count_tokens(
-        model="claude-haiku-4-5-20251001",
-        system=system_prompt,
-        tools=tools,
-        messages=[{"role": "user", "content": user_prompt}]
-    )
-    print(response.input_tokens)
-    #return None
-
-    # Agentic loop
     final_message = _agentic_loop(system_prompt, tools, messages, user_id)
     return final_message
 
 def process_message(user_id, user_prompt):
     oldest_date = fetch_data.get_oldest_date(user_id)
-    response = call_chatbot(user_id, user_prompt, oldest_date)
+    history = fetch_data.get_recent_messages(user_id, limit=2)
+    response = call_chatbot(user_id, user_prompt, oldest_date, history)
 
     supabase.table("Messages").insert({
         'user_id': user_id,
