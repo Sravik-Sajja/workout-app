@@ -143,5 +143,17 @@ def get_chat_history():
         print(f"ERROR in get_chat_history: {e}")
         return jsonify({'error': str(e)}), 500
 
+@app.route("/api/get-last-exercise-sets", methods = ['GET'])
+def get_last_exercise_sets():
+    try:
+        user_id = request.args.get('user_id')
+        exercise_type = request.args.get('exercise_type')
+        last_sets = fetch_data.get_last_exercise_sets(user_id, exercise_type)
+
+        return jsonify({'sets': last_sets}), 200
+    except Exception as e:
+        print(f"ERROR in get_last_exercise_sets: {e}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)

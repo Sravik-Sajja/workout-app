@@ -171,8 +171,11 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
   const [currentExerciseName, setCurrentExerciseName] = useState('');
   const [sets, setSets] = useState([{ weight: '', reps: '' }]);
   const [editingExerciseIndex, setEditingExerciseIndex] = useState(null);
-  const [isDragging, setIsDragging] = useState(false); // passed to ScrollView
+  const [isDragging, setIsDragging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  const [allExerciseOptions, setAllExerciseOptions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const addSet = () => {
     setSets([...sets, { weight: '', reps: '' }]);
@@ -206,6 +209,7 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
     }
     setCurrentExerciseName('');
     setSets([{ weight: '', reps: '' }]);
+    setShowSuggestions(false);
   };
 
   const removeExercise = (index) => {
@@ -267,6 +271,49 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
     }
   }, [isNewWorkout, workoutType, userId, date]);
 
+  // fetch all exercises ever logged for this workout type, debounced on workoutName
+  useEffect(() => {
+    if (!userId || !workoutName || !workoutName.trim()) {
+      setAllExerciseOptions([]);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/get-exercises-for-dropdown?user_id=${userId}&workout_type=${encodeURIComponent(workoutName.trim())}`
+        );
+        const data = await response.json();
+        setAllExerciseOptions(data.exercises || []);
+      } catch (error) {
+        setAllExerciseOptions([]);
+      }
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [workoutName, userId]);
+
+  // filter suggestions as user types
+  const filteredExerciseOptions = allExerciseOptions.filter((ex) =>
+    ex.toLowerCase().includes(currentExerciseName.toLowerCase())
+  );
+
+  // called when a suggestion is tapped — sets the name and autofills last sets
+  const selectExercise = async (name) => {
+    setCurrentExerciseName(name);
+    setShowSuggestions(false);
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/get-last-exercise-sets?user_id=${userId}&exercise_type=${encodeURIComponent(name)}`
+      );
+      const data = await response.json();
+      if (data.sets && data.sets.length > 0) {
+        setSets(data.sets.map((s) => ({ weight: String(s.weight), reps: String(s.reps) })));
+      }
+    } catch (error) {
+      // no last data
+    }
+  };
+
   return (
     <ThemedView style={styles.container}>
       <KeyboardAwareScrollView
@@ -311,13 +358,42 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
         <View style={[styles.section, { backgroundColor: theme.uiBackground }]}>
           <ThemedText style={styles.sectionLabel}>SAVE EXERCISE</ThemedText>
 
-          <TextInput
-            style={[styles.input, { borderColor: theme.text, color: theme.title, backgroundColor: theme.background }]}
-            placeholder="Exercise name (e.g., Bench Press)"
-            placeholderTextColor={theme.text}
-            value={currentExerciseName}
-            onChangeText={setCurrentExerciseName}
-          />
+          {/* exercise name field with autocomplete dropdown */}
+          <View style={styles.autocompleteWrap}>
+            <TextInput
+              style={[styles.input, { borderColor: theme.text, color: theme.title, backgroundColor: theme.background, marginBottom: 0 }]}
+              placeholder="Exercise name (e.g., Bench Press)"
+              placeholderTextColor={theme.text}
+              value={currentExerciseName}
+              onChangeText={(text) => {
+                setCurrentExerciseName(text);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            />
+
+            {showSuggestions && filteredExerciseOptions.length > 0 && (
+              <View style={[styles.suggestionsBox, { backgroundColor: theme.background, borderColor: theme.text + '30' }]}>
+                <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 160 }} nestedScrollEnabled>
+                  {filteredExerciseOptions.map((ex, i) => (
+                    <Pressable
+                      key={i}
+                      onPress={() => selectExercise(ex)}
+                      style={({ pressed }) => [
+                        styles.suggestionItem,
+                        { borderBottomColor: theme.text + '15' },
+                        pressed && { backgroundColor: Colors.primary + '15' },
+                      ]}
+                    >
+                      <ThemedText style={{ color: theme.title }}>{ex}</ThemedText>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+          </View>
+          <Spacer height={16} />
 
           <ThemedText style={[styles.subsectionLabel, { color: theme.text }]}>Sets</ThemedText>
 
@@ -462,6 +538,31 @@ const styles = StyleSheet.create({
     padding: 14,
     fontSize: 15,
     marginBottom: 16,
+  },
+  autocompleteWrap: {
+    position: 'relative',
+    zIndex: 10,
+  },
+  suggestionsBox: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    marginTop: 4,
+    borderWidth: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    zIndex: 20,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+  },
+  suggestionItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
   },
   subsectionLabel: {
     fontSize: 13,

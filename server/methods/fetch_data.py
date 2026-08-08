@@ -188,6 +188,23 @@ def get_recent_messages(user_id, limit=2):
     )
     return list(reversed(response.data))
 
+def get_last_exercise_sets(user_id, exercise_type):
+    response = (
+        supabase.table("Exercises")
+        .select("exercise_id, date, Sets(weight, reps, set_number)")
+        .eq("UUID", user_id)
+        .eq("exercise_type", exercise_type)
+        .order("date", desc=True)
+        .limit(1)
+        .execute()
+    )
+
+    if not response.data:
+        return []
+
+    last_sets = sorted(response.data[0]['Sets'], key=lambda s: s['set_number'])
+    return [{'weight': s['weight'], 'reps': s['reps']} for s in last_sets]
+
 def get_current_date():
     return date.today()
 
