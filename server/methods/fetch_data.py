@@ -85,23 +85,26 @@ def _fetch_exercise_weight_data(workout_id):
         })
     return exercises
 
-#gets all exercises ever done for a specific workout
+#gets all exercises ever done for a workout type
 def get_all_exercises_from_a_workout(user_id, workout_type):
-    response = (
+    query = (
         supabase.table("Exercises")
         .select("exercise_type, Workouts!inner(UUID, workout_type)")
         .eq("Workouts.UUID", user_id)
-        .eq("Workouts.workout_type", workout_type)
-        .execute()
     )
-    
+
+    if workout_type is not None:
+        query = query.eq("Workouts.workout_type", workout_type)
+
+    response = query.execute()
+
     if not response.data:
         return []
-    
+
     seen = set()
     for row in response.data:
         seen.add(row["exercise_type"])
-    
+
     return list(seen)
 
 #gets weght data for a specific exercise

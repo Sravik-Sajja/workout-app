@@ -199,11 +199,14 @@ Test coverage includes streak calculations, workout percentage, best month logic
 | GET | `/api/get-workouts` | Get all workout types + dates |
 | GET | `/api/get-recent-exercises` | Last exercises for a workout type |
 | GET | `/api/get-workout-details` | Full details for a specific date |
+| GET | `/api/get-exercises-for-workout` | Exercise list for workout type|
 | GET | `/api/overall-stats` | All-time stats |
 | GET | `/api/recent-stats` | Last 30 days stats |
 | GET | `/api/get-exercise-stats` | Weight progression for an exercise |
 | GET | `/api/get-tips` | AI-generated training tips |
 | GET | `/api/get-chatbot-response` | AI coach response |
+| GET | `/api/get-chat-history` | AI chat history |
+| GET | `/api/get-last-exercise-sets` | Recent weight stats for exercise |
 
 ---
 

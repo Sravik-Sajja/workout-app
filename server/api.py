@@ -52,16 +52,17 @@ def get_recent_exercises():
         return jsonify({'error': str(e)}), 500
 
 #to show all exercises ever done for a specific workout
-@app.route("/api/get-exercises-for-dropdown",  methods = ['GET'])
-def get_exercises_for_dropdown():
+@app.route("/api/get-exercises-for-workout",  methods = ['GET'])
+def get_exercises_for_workout():
     try:
         user_id = request.args.get('user_id')
         workout_type = request.args.get('workout_type')
-        all_exercises = list(fetch_data.get_all_exercises_from_a_workout(user_id, workout_type))
+        if workout_type == "None": workout_type = None
+        all_exercises = fetch_data.get_all_exercises_from_a_workout(user_id, workout_type)
 
         return jsonify({'exercises': all_exercises}), 200
     except Exception as e:
-        print(f"ERROR in get_exercises: {e}")
+        print(f"ERROR in get-exercises-for-workout: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route("/api/overall-stats", methods = ['GET'])

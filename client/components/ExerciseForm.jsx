@@ -271,7 +271,7 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
     }
   }, [isNewWorkout, workoutType, userId, date]);
 
-  // fetch all exercises ever logged for this workout type, debounced on workoutName
+  // fetch all exercises ever logged, debounced on workoutName
   useEffect(() => {
     if (!userId || !workoutName || !workoutName.trim()) {
       setAllExerciseOptions([]);
@@ -280,7 +280,7 @@ const ExerciseForm = ({ date, workoutType, userId, onClose, isNewWorkout }) => {
     const timeout = setTimeout(async () => {
       try {
         const response = await fetch(
-          `${API_URL}/api/get-exercises-for-dropdown?user_id=${userId}&workout_type=${encodeURIComponent(workoutName.trim())}`
+          `${API_URL}/api/get-exercises-for-workout?user_id=${userId}&workout_type=None`
         );
         const data = await response.json();
         setAllExerciseOptions(data.exercises || []);

@@ -41,7 +41,7 @@ const WeightStats = () => {
         if (!selectedWorkout) return
         const getAllExercises = async () => {
             const userId = await getUser()
-            const response = await fetch(`${API_URL}/api/get-exercises-for-dropdown?user_id=${userId}&workout_type=${encodeURIComponent(selectedWorkout)}`);
+            const response = await fetch(`${API_URL}/api/get-exercises-for-workout?user_id=${userId}&workout_type=${encodeURIComponent(selectedWorkout)}`);
             const data = await response.json();
             const exerciseData = data.exercises
             setHasSelectedWorkout(true)
